@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DeFiChain Master Pro Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script src="https://cdn.ethers.io/lib/ethers-5.7.umd.min.js" type="application/javascript"></script>
+<style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            min-height: 100vh;
+        }
+        .card-gradient {
+            background: linear-gradient(145deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.9) 100%);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+        }
+        .glass-button {
+            background: rgba(124, 58, 237, 0.15);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            transition: all 0.3s ease;
+        }
+        .glass-button:hover {
+            background: rgba(124, 58, 237, 0.25);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(139, 92, 246, 0.2);
+        }
+        .stat-card {
+            transition: transform 0.3s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+    </style>
+</head>
+<body class="text-gray-100">
+    <!-- Header -->
+    <header class="border-b border-gray-800">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <div class="w-10 h-10 rounded-lg bg-indigo-600 flex items-center justify-center">
+                    <i data-feather="layers" class="text-white"></i>
+                </div>
+                <h1 class="text-2xl font-bold">DeFiChain Master Pro</h1>
+            </div>
+<div class="flex items-center space-x-4">
+                <button id="connectWallet" class="glass-button px-6 py-2 rounded-lg font-medium flex items-center space-x-2">
+                    <i data-feather="wallet"></i>
+                    <span>Connect Wallet</span>
+                </button>
+                <div id="walletInfo" class="hidden items-center space-x-2">
+                    <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                    <span id="walletAddress" class="font-mono text-sm"></span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- Stats Overview -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="stat-card card-gradient p-6 rounded-xl shadow-lg">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-gray-400 text-sm">Your Balance</p>
+                        <h2 class="text-2xl font-bold mt-1" id="balance">0 DWT</h2>
+                    </div>
+                    <div class="p-3 rounded-lg bg-indigo-500/20">
+                        <i data-feather="dollar-sign" class="text-indigo-400"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stat-card card-gradient p-6 rounded-xl shadow-lg">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-gray-400 text-sm">Staked Tokens</p>
+                        <h2 class="text-2xl font-bold mt-1" id="staked">0 DWT</h2>
+                    </div>
+                    <div class="p-3 rounded-lg bg-emerald-500/20">
+                        <i data-feather="lock" class="text-emerald-400"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stat-card card-gradient p-6 rounded-xl shadow-lg">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-gray-400 text-sm">Rewards Available</p>
+                        <h2 class="text-2xl font-bold mt-1" id="rewards">0 DWT</h2>
+                    </div>
+                    <div class="p-3 rounded-lg bg-amber-500/20">
+                        <i data-feather="gift" class="text-amber-400"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Staking Interface -->
+        <div class="card-gradient rounded-2xl shadow-xl overflow-hidden">
+            <div class="p-6 border-b border-gray-800">
+                <h2 class="text-xl font-bold">Staking Dashboard</h2>
+                <p class="text-gray-400 mt-1">Stake your DCM tokens to earn rewards</p>
+            </div>
+<div class="p-6">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Stake Section -->
+                    <div class="space-y-6">
+                        <h3 class="text-lg font-semibold flex items-center">
+                            <i data-feather="plus-circle" class="mr-2 text-indigo-400"></i>
+                            Stake Tokens
+                        </h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm text-gray-400 mb-2">Amount to Stake</label>
+                                <div class="relative">
+                                    <input 
+                                        type="number" 
+                                        id="stakeAmount" 
+                                        placeholder="0.0"
+                                        class="w-full bg-gray-800/50 border border-gray-700 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                                    >
+                                    <button 
+                                        id="maxStake" 
+                                        class="absolute right-3 top-1/2 transform -translate-y-1/2 text-xs bg-gray-700 hover:bg-gray-600 px-2 py-1 rounded"
+                                    >
+                                        MAX
+                                    </button>
+                                </div>
+                            </div>
+<button 
+                                id="stakeButton" 
+                                class="glass-button w-full py-3 rounded-lg font-medium flex items-center justify-center space-x-2"
+                            >
+                                <i data-feather="lock"></i>
+                                <span>Stake Tokens</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Withdraw Section -->
+                    <div class="space-y-6">
+                        <h3 class="text-lg font-semibold flex items-center">
+                            <i data-feather="minus-circle" class="mr-2 text-amber-400"></i>
+                            Withdraw & Claim
+                        </h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm text-gray-400 mb-2">Amount to Withdraw</label>
+                                <div class="relative">
+                                    <input 
+                                        type="number" 
+                                        id="withdrawAmount" 
+                                        placeholder="0.0"
+                                        class="w-full bg-gray-800/50 border border-gray-700 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                                    >
+                                    <button 
+                                        id="maxWithdraw" 
+                                        class="absolute right-3 top-1/2 transform -translate-y-1/2 text-xs bg-gray-700 hover:bg-gray-600 px-2 py-1 rounded"
+                                    >
+                                        MAX
+                                    </button>
+                                </div>
+                            </div>
+<div class="grid grid-cols-2 gap-4">
+                                <button 
+                                    id="withdrawButton" 
+                                    class="glass-button py-3 rounded-lg font-medium flex items-center justify-center space-x-2"
+                                >
+                                    <i data-feather="unlock"></i>
+                                    <span>Withdraw</span>
+                                </button>
+                                
+                                <button 
+                                    id="claimButton" 
+                                    class="bg-amber-600/20 hover:bg-amber-600/30 border border-amber-500/30 py-3 rounded-lg font-medium flex items-center justify-center space-x-2 transition-all"
+                                >
+                                    <i data-feather="download"></i>
+                                    <span>Claim Rewards</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- APR Info -->
+                <div class="mt-8 pt-6 border-t border-gray-800">
+                    <div class="flex flex-wrap items-center justify-between gap-4">
+                        <div class="flex items-center space-x-2">
+                            <div class="p-2 rounded-lg bg-indigo-500/20">
+                                <i data-feather="percent" class="text-indigo-400"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-400">Current APR</p>
+                                <p class="font-bold">10%</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center space-x-2">
+                            <div class="p-2 rounded-lg bg-emerald-500/20">
+                                <i data-feather="clock" class="text-emerald-400"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-400">Reward Distribution</p>
+                                <p class="font-bold">Real-time</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center space-x-2">
+                            <div class="p-2 rounded-lg bg-amber-500/20">
+                                <i data-feather="shield" class="text-amber-400"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-400">Contract Security</p>
+                                <p class="font-bold">Audited</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Token Info -->
+        <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="card-gradient p-6 rounded-xl">
+                <h3 class="font-bold text-lg mb-4">About DeFiChain Master Token (DCM)</h3>
+                <p class="text-gray-400 text-sm leading-relaxed">
+                    DCM is the native governance token of the DeFiChain Master Pro ecosystem. Stake your tokens to participate 
+                    in protocol governance and earn passive rewards through our staking mechanism.
+                </p>
+                <div class="mt-4 flex items-center space-x-4">
+                    <div class="text-center">
+                        <p class="text-2xl font-bold">15M</p>
+                        <p class="text-xs text-gray-500">Total Supply</p>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-2xl font-bold">12%</p>
+                        <p class="text-xs text-gray-500">APR</p>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-2xl font-bold">EVM</p>
+                        <p class="text-xs text-gray-500">Compatible</p>
+                    </div>
+                </div>
+            </div>
+<div class="card-gradient p-6 rounded-xl">
+                <h3 class="font-bold text-lg mb-4">How It Works</h3>
+                <ul class="space-y-3 text-sm text-gray-400">
+                    <li class="flex items-start">
+                        <i data-feather="check-circle" class="text-emerald-400 mr-2 mt-1 flex-shrink-0"></i>
+                        <span>Connect your wallet to interact with the protocol</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i data-feather="check-circle" class="text-emerald-400 mr-2 mt-1 flex-shrink-0"></i>
+                        <span>Stake DWT tokens to start earning rewards immediately</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i data-feather="check-circle" class="text-emerald-400 mr-2 mt-1 flex-shrink-0"></i>
+                        <span>Withdraw or claim rewards anytime with no lock-up period</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i data-feather="check-circle" class="text-emerald-400 mr-2 mt-1 flex-shrink-0"></i>
+                        <span>Participate in governance proposals with staked tokens</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-gray-800 mt-12 py-8">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="flex items-center space-x-2 mb-4 md:mb-0">
+                    <div class="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center">
+                        <i data-feather="layers" class="text-white text-sm"></i>
+                    </div>
+                    <span class="font-bold">DeFiChain Master Pro</span>
+                </div>
+<div class="flex space-x-6">
+                    <a href="#" class="text-gray-400 hover:text-white transition">
+                        <i data-feather="github"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white transition">
+                        <i data-feather="twitter"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white transition">
+                        <i data-feather="book"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white transition">
+                        <i data-feather="help-circle"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="mt-6 text-center text-sm text-gray-500">
+                <p>© 2023 DeFiChain Master Pro. All rights reserved. Audited smart contracts.</p>
+            </div>
+        </div>
+    </footer>
+    <script>
+        feather.replace();
+        
+        // Contract ABI and Address (mock values)
+        const contractABI = [
+            "function stake(uint256 amount)",
+            "function withdraw(uint256 amount)",
+            "function claimRewards()",
+            "function getStakedBalance(address user) view returns (uint256)",
+            "function getRewardBalance(address user) view returns (uint256)",
+            "function getTotalSupply() view returns (uint256)"
+        ];
+        const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+        
+        let provider;
+        let signer;
+        let contract;
+        let userAddress;
+        // Initialize Web3
+        async function initWeb3() {
+            if (typeof window.ethereum !== 'undefined') {
+                try {
+                    // Request account access
+                    await window.ethereum.request({ method: 'eth_requestAccounts' });
+                    
+                    // Create provider and signer
+                    provider = new ethers.providers.Web3Provider(window.ethereum);
+                    signer = provider.getSigner();
+                    userAddress = await signer.getAddress();
+                    
+                    // Create contract instance
+                    contract = new ethers.Contract(contractAddress, contractABI, signer);
+                    
+                    // Update UI
+                    document.getElementById('connectWallet').classList.add('hidden');
+                    document.getElementById('walletInfo').classList.remove('hidden');
+                    document.getElementById('walletAddress').textContent = `${userAddress.substring(0, 6)}...${userAddress.substring(userAddress.length - 4)}`;
+                    
+                    // Load user data
+                    loadUserData();
+                    
+                    return true;
+                } catch (error) {
+                    console.error("User denied account access", error);
+                    alert("Failed to connect wallet. Please try again.");
+                    return false;
+                }
+            } else {
+                alert("Please install MetaMask or another Ethereum wallet extension!");
+                return false;
+            }
+        }
+        
+        // Handle account changes
+        if (window.ethereum) {
+            window.ethereum.on('accountsChanged', function (accounts) {
+                if (accounts.length > 0) {
+                    // Reload the page when account changes
+                    window.location.reload();
+                } else {
+                    // If no accounts, show connect button again
+                    document.getElementById('connectWallet').classList.remove('hidden');
+                    document.getElementById('walletInfo').classList.add('hidden');
+                }
+            });
+            
+            // Handle chain changes
+            window.ethereum.on('chainChanged', function () {
+                // Reload the page when chain changes
+                window.location.reload();
+            });
+        }
+// Load user data from contract
+        async function loadUserData() {
+            if (!contract || !userAddress) return;
+            
+            try {
+                // Get user balances (mock values since we don't have a real contract)
+                const balance = ethers.utils.parseEther("1250");
+                const staked = ethers.utils.parseEther("850");
+                const rewards = ethers.utils.parseEther("42.5");
+                
+                // Update UI with formatted values
+                document.getElementById('balance').textContent = `${parseFloat(ethers.utils.formatEther(balance)).toFixed(2)} DCM`;
+                document.getElementById('staked').textContent = `${parseFloat(ethers.utils.formatEther(staked)).toFixed(2)} DCM`;
+                document.getElementById('rewards').textContent = `${parseFloat(ethers.utils.formatEther(rewards)).toFixed(2)} DCM`;
+} catch (error) {
+                console.error("Error loading user data:", error);
+            }
+        }
+        
+        // Connect wallet button
+        document.getElementById('connectWallet').addEventListener('click', async function() {
+            await initWeb3();
+        });
+        
+        // Max stake button
+        document.getElementById('maxStake').addEventListener('click', async function() {
+            if (!userAddress) {
+                alert("Please connect your wallet first!");
+                return;
+            }
+            
+            try {
+                // Get user balance (mock)
+                const balance = "1250.00";
+                document.getElementById('stakeAmount').value = balance;
+} catch (error) {
+                console.error("Error getting max stake amount:", error);
+            }
+        });
+        
+        // Max withdraw button
+        document.getElementById('maxWithdraw').addEventListener('click', async function() {
+            if (!userAddress) {
+                alert("Please connect your wallet first!");
+                return;
+            }
+            
+            try {
+                // Get staked amount (mock)
+                const staked = "850.00";
+                document.getElementById('withdrawAmount').value = staked;
+} catch (error) {
+                console.error("Error getting max withdraw amount:", error);
+            }
+        });
+        
+        // Stake button
+        document.getElementById('stakeButton').addEventListener('click', async function() {
+            if (!contract || !userAddress) {
+                alert("Please connect your wallet first!");
+                return;
+            }
+            
+            const amount = document.getElementById('stakeAmount').value;
+            if (!amount || amount <= 0) {
+                alert("Please enter a valid amount to stake!");
+                return;
+            }
+            
+            try {
+                // Convert amount to wei
+                const amountWei = ethers.utils.parseEther(amount);
+                
+                // Call stake function (mock transaction)
+                // In a real implementation, this would be:
+                // const tx = await contract.stake(amountWei);
+                // await tx.wait();
+                
+                // Simulate transaction delay
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                
+                alert(`Successfully staked ${amount} DCM!`);
+                document.getElementById('stakeAmount').value = '';
+                
+                // Reload user data
+                loadUserData();
+            } catch (error) {
+                console.error("Staking error:", error);
+                alert("Staking failed. Please try again.");
+            }
+        });
+        
+        // Withdraw button
+        document.getElementById('withdrawButton').addEventListener('click', async function() {
+            if (!contract || !userAddress) {
+                alert("Please connect your wallet first!");
+                return;
+            }
+            
+            const amount = document.getElementById('withdrawAmount').value;
+            if (!amount || amount <= 0) {
+                alert("Please enter a valid amount to withdraw!");
+                return;
+            }
+            
+            try {
+                // Convert amount to wei
+                const amountWei = ethers.utils.parseEther(amount);
+                
+                // Call withdraw function (mock transaction)
+                // In a real implementation, this would be:
+                // const tx = await contract.withdraw(amountWei);
+                // await tx.wait();
+                
+                // Simulate transaction delay
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                
+                alert(`Successfully withdrew ${amount} DCM!`);
+                document.getElementById('withdrawAmount').value = '';
+                
+                // Reload user data
+                loadUserData();
+            } catch (error) {
+                console.error("Withdrawal error:", error);
+                alert("Withdrawal failed. Please try again.");
+            }
+        });
+        
+        // Claim rewards button
+        document.getElementById('claimButton').addEventListener('click', async function() {
+            if (!contract || !userAddress) {
+                alert("Please connect your wallet first!");
+                return;
+            }
+            
+            try {
+                // Call claimRewards function (mock transaction)
+                // In a real implementation, this would be:
+                // const tx = await contract.claimRewards();
+                // await tx.wait();
+                
+                // Simulate transaction delay
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                
+                alert('Successfully claimed rewards!');
+                
+                // Reload user data
+                loadUserData();
+            } catch (error) {
+                console.error("Claim error:", error);
+                alert("Claiming rewards failed. Please try again.");
+            }
+        });
+    </script>
+</body>
+</html>
