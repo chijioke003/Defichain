@@ -48,7 +48,7 @@
                 </div>
                 <h1 class="text-2xl font-bold">DeFiChain Master Pro</h1>
             </div>
-<div class="flex items-center space-x-4">
+            <div class="flex items-center space-x-4">
                 <button id="connectWallet" class="glass-button px-6 py-2 rounded-lg font-medium flex items-center space-x-2">
                     <i data-feather="wallet"></i>
                     <span>Connect Wallet</span>
@@ -56,9 +56,13 @@
                 <div id="walletInfo" class="hidden items-center space-x-2">
                     <div class="w-3 h-3 rounded-full bg-green-500"></div>
                     <span id="walletAddress" class="font-mono text-sm"></span>
+                    <button id="disconnectWallet" class="glass-button px-3 py-1 rounded text-sm flex items-center space-x-1">
+                        <i data-feather="log-out" class="w-4 h-4"></i>
+                        <span>Disconnect</span>
+                    </button>
                 </div>
             </div>
-        </div>
+</div>
     </header>
 
     <!-- Main Content -->
@@ -300,12 +304,100 @@
             </div>
             <div class="mt-6 text-center text-sm text-gray-500">
                 <p>© 2023 DeFiChain Master Pro. All rights reserved. Audited smart contracts.</p>
-            </div>
+</div>
         </div>
     </footer>
+    <!-- Wallet Connection Modal -->
+    <div id="walletModal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden">
+        <div class="card-gradient rounded-2xl p-6 w-full max-w-md mx-4">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold">Connect Wallet</h3>
+                <button id="closeModal" class="text-gray-400 hover:text-white">
+                    <i data-feather="x"></i>
+                </button>
+            </div>
+            
+            <div class="space-y-4">
+                    <button id="metamaskBtn" class="glass-button w-full py-3 rounded-lg font-medium flex items-center space-x-3">
+                        <div class="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center">
+                            <i data-feather="zap" class="text-white text-sm"></i>
+                        </div>
+                        <span>MetaMask</span>
+                    </button>
+                    
+                    <button id="coinbaseBtn" class="glass-button w-full py-3 rounded-lg font-medium flex items-center space-x-3">
+                        <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center">
+                            <i data-feather="credit-card" class="text-white text-sm"></i>
+                        </div>
+                        <span>Coinbase Wallet</span>
+                    </button>
+                    <button id="walletConnectBtn" class="glass-button w-full py-3 rounded-lg font-medium flex items-center space-x-3">
+                        <div class="w-8 h-8 rounded-full bg-purple-500 flex items-center justify-center">
+                            <i data-feather="smartphone" class="text-white text-sm"></i>
+                        </div>
+                        <span>WalletConnect</span>
+                    </button>
+                    
+                    <button id="manualConnectBtn" class="glass-button w-full py-3 rounded-lg font-medium flex items-center space-x-3">
+                        <div class="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center">
+                            <i data-feather="key" class="text-white text-sm"></i>
+                        </div>
+                        <span>Manual Connect</span>
+                    </button>
+</div>
+            
+            <p class="text-gray-400 text-sm mt-6 text-center">
+                By connecting your wallet, you agree to our Terms of Service and Privacy Policy
+            </p>
+        </div>
+    </div>
+
+    <!-- Manual Connect Modal -->
+    <div id="manualConnectModal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden">
+        <div class="card-gradient rounded-2xl p-6 w-full max-w-md mx-4">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold">Manual Connect</h3>
+                <button id="closeManualModal" class="text-gray-400 hover:text-white">
+                    <i data-feather="x"></i>
+                </button>
+            </div>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm text-gray-400 mb-2">Enter Private Key or Seed Phrase</label>
+                    <textarea 
+                        id="privateKeyInput" 
+                        placeholder="Enter your private key or 12-word seed phrase"
+                        class="w-full bg-gray-800/50 border border-gray-700 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent h-24 text-sm"
+                    ></textarea>
+                </div>
+                
+                <div class="flex items-center">
+                    <input 
+                        type="checkbox" 
+                        id="showPrivateKey" 
+                        class="rounded bg-gray-700 border-gray-600 text-indigo-500 focus:ring-indigo-500"
+                    >
+                    <label for="showPrivateKey" class="ml-2 text-sm text-gray-400">Show private key</label>
+                </div>
+                
+                <button 
+                    id="confirmManualConnect" 
+                    class="glass-button w-full py-3 rounded-lg font-medium flex items-center justify-center space-x-2"
+                >
+                    <i data-feather="key"></i>
+                    <span>Connect</span>
+                </button>
+            </div>
+            
+            <p class="text-red-400 text-xs mt-4 text-center">
+                Warning: Never share your private keys. Connecting manually is less secure than using a wallet provider.
+            </p>
+        </div>
+    </div>
+
     <script>
-        feather.replace();
-        
+feather.replace();
         // Contract ABI and Address (mock values)
         const contractABI = [
             "function stake(uint256 amount)",
@@ -316,14 +408,52 @@
             "function getTotalSupply() view returns (uint256)"
         ];
         const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
-        
-        let provider;
+let provider;
         let signer;
         let contract;
         let userAddress;
-        // Initialize Web3
-        async function initWeb3() {
-            if (typeof window.ethereum !== 'undefined') {
+        
+        // Wallet connection modal elements
+        const walletModal = document.getElementById('walletModal');
+        const connectWalletBtn = document.getElementById('connectWallet');
+        const closeModalBtn = document.getElementById('closeModal');
+        
+        // Show wallet modal
+        connectWalletBtn.addEventListener('click', () => {
+            walletModal.classList.remove('hidden');
+        });
+        
+        // Close wallet modal
+        closeModalBtn.addEventListener('click', () => {
+            walletModal.classList.add('hidden');
+        });
+        
+        // Close modal when clicking outside
+        walletModal.addEventListener('click', (e) => {
+            if (e.target === walletModal) {
+                walletModal.classList.add('hidden');
+            }
+        });
+        // Wallet connection functions
+        async function connectMetaMask() {
+            // Immediately show the dashboard interface
+            walletModal.classList.add('hidden');
+            document.getElementById('connectWallet').classList.add('hidden');
+            document.getElementById('walletInfo').classList.remove('hidden');
+            document.getElementById('walletAddress').textContent = "0x742d...1a9f"; // Mock address
+            
+            // Simulate loading user data
+            setTimeout(() => {
+                document.getElementById('balance').textContent = "1,250.00 DCM";
+                document.getElementById('staked').textContent = "850.00 DCM";
+                document.getElementById('rewards').textContent = "42.50 DCM";
+            }, 1000);
+            
+            return true;
+        }
+// Coinbase Wallet connection
+        async function connectCoinbase() {
+            if (typeof window.ethereum !== 'undefined' && window.ethereum.isCoinbaseWallet) {
                 try {
                     // Request account access
                     await window.ethereum.request({ method: 'eth_requestAccounts' });
@@ -337,26 +467,192 @@
                     contract = new ethers.Contract(contractAddress, contractABI, signer);
                     
                     // Update UI
+                    walletModal.classList.add('hidden');
                     document.getElementById('connectWallet').classList.add('hidden');
                     document.getElementById('walletInfo').classList.remove('hidden');
                     document.getElementById('walletAddress').textContent = `${userAddress.substring(0, 6)}...${userAddress.substring(userAddress.length - 4)}`;
                     
                     // Load user data
                     loadUserData();
-                    
-                    return true;
                 } catch (error) {
-                    console.error("User denied account access", error);
-                    alert("Failed to connect wallet. Please try again.");
-                    return false;
+                    console.error("Coinbase Wallet connection error:", error);
+                    alert("Failed to connect Coinbase Wallet. Please try again.");
                 }
             } else {
-                alert("Please install MetaMask or another Ethereum wallet extension!");
-                return false;
+                // Try to inject Coinbase Wallet
+                try {
+                    const coinbaseWallet = window.coinbaseWalletExtension;
+                    if (coinbaseWallet) {
+                        await coinbaseWallet.enable();
+                        provider = new ethers.providers.Web3Provider(coinbaseWallet);
+                        signer = provider.getSigner();
+                        userAddress = await signer.getAddress();
+                        
+                        contract = new ethers.Contract(contractAddress, contractABI, signer);
+                        
+                        walletModal.classList.add('hidden');
+                        document.getElementById('connectWallet').classList.add('hidden');
+                        document.getElementById('walletInfo').classList.remove('hidden');
+                        document.getElementById('walletAddress').textContent = `${userAddress.substring(0, 6)}...${userAddress.substring(userAddress.length - 4)}`;
+                        
+                        loadUserData();
+                    } else {
+                        alert("Please install Coinbase Wallet extension!");
+                    }
+                } catch (error) {
+                    console.error("Coinbase Wallet injection error:", error);
+                    alert("Failed to connect Coinbase Wallet. Please try again.");
+                }
             }
         }
         
-        // Handle account changes
+        // WalletConnect connection
+        async function connectWalletConnect() {
+            try {
+                // Dynamically import WalletConnect provider
+                const { WalletConnectProvider } = await import('https://cdn.jsdelivr.net/npm/@walletconnect/ethereum-provider@2.11.0/dist/index.es.js');
+                
+                // Create WalletConnect provider
+                const wcProvider = new WalletConnectProvider.default({
+                    projectId: "YOUR_PROJECT_ID_HERE", // Replace with your WalletConnect project ID
+                    chains: [1], // Ethereum mainnet
+                    showQrModal: true
+                });
+                
+                // Enable session
+                await wcProvider.enable();
+                
+                // Create ethers provider and signer
+                provider = new ethers.providers.Web3Provider(wcProvider);
+                signer = provider.getSigner();
+                userAddress = await signer.getAddress();
+                
+                // Create contract instance
+                contract = new ethers.Contract(contractAddress, contractABI, signer);
+                
+                // Update UI
+                walletModal.classList.add('hidden');
+                document.getElementById('connectWallet').classList.add('hidden');
+                document.getElementById('walletInfo').classList.remove('hidden');
+                document.getElementById('walletAddress').textContent = `${userAddress.substring(0, 6)}...${userAddress.substring(userAddress.length - 4)}`;
+                
+                // Load user data
+                loadUserData();
+                
+                // Handle session events
+                wcProvider.on("accountsChanged", (accounts) => {
+                    window.location.reload();
+                });
+                
+                wcProvider.on("chainChanged", (chainId) => {
+                    window.location.reload();
+                });
+                
+                wcProvider.on("disconnect", () => {
+                    window.location.reload();
+                });
+            } catch (error) {
+                console.error("WalletConnect connection error:", error);
+                alert("Failed to connect WalletConnect. Please try again.");
+            }
+        }
+        // Wallet connection buttons
+        document.getElementById('metamaskBtn').addEventListener('click', connectMetaMask);
+        document.getElementById('coinbaseBtn').addEventListener('click', connectCoinbase);
+        document.getElementById('walletConnectBtn').addEventListener('click', connectWalletConnect);
+        document.getElementById('manualConnectBtn').addEventListener('click', function() {
+            walletModal.classList.add('hidden');
+            document.getElementById('manualConnectModal').classList.remove('hidden');
+        });
+        // Disconnect wallet button
+        document.getElementById('disconnectWallet').addEventListener('click', function() {
+            // Reset UI to initial state
+            document.getElementById('connectWallet').classList.remove('hidden');
+            document.getElementById('walletInfo').classList.add('hidden');
+            document.getElementById('walletAddress').textContent = '';
+            
+            // Reset all data fields
+            document.getElementById('balance').textContent = "0 DWT";
+            document.getElementById('staked').textContent = "0 DWT";
+            document.getElementById('rewards').textContent = "0 DWT";
+            
+            // Clear input fields
+            document.getElementById('stakeAmount').value = '';
+            document.getElementById('withdrawAmount').value = '';
+            
+            // Reset global variables
+            provider = null;
+            signer = null;
+            contract = null;
+            userAddress = null;
+        });
+        
+        // Manual connect modal elements
+        const manualConnectModal = document.getElementById('manualConnectModal');
+        const closeManualModalBtn = document.getElementById('closeManualModal');
+        const showPrivateKeyCheckbox = document.getElementById('showPrivateKey');
+        const privateKeyInput = document.getElementById('privateKeyInput');
+        
+        // Toggle private key visibility
+        showPrivateKeyCheckbox.addEventListener('change', function() {
+            if (this.checked) {
+                privateKeyInput.type = 'text';
+            } else {
+                privateKeyInput.type = 'password';
+            }
+        });
+        
+        // Close manual connect modal
+        closeManualModalBtn.addEventListener('click', function() {
+            manualConnectModal.classList.add('hidden');
+            privateKeyInput.value = '';
+        });
+        
+        // Close manual connect modal when clicking outside
+        manualConnectModal.addEventListener('click', function(e) {
+            if (e.target === manualConnectModal) {
+                manualConnectModal.classList.add('hidden');
+                privateKeyInput.value = '';
+            }
+        });
+        
+        // Confirm manual connect
+        document.getElementById('confirmManualConnect').addEventListener('click', async function() {
+            const privateKeyOrSeed = privateKeyInput.value.trim();
+            
+            if (!privateKeyOrSeed) {
+                alert("Please enter your private key or seed phrase");
+                return;
+            }
+            
+            try {
+                // For security reasons, we're simulating the connection process
+                // In a real implementation, you would use ethers.js to create a wallet
+                
+                // Simulate wallet creation
+                const mockAddress = "0x742d35Cc6634C0532925a3b844Bc454e4438f44e";
+                
+                // Update UI
+                manualConnectModal.classList.add('hidden');
+                document.getElementById('connectWallet').classList.add('hidden');
+                document.getElementById('walletInfo').classList.remove('hidden');
+                document.getElementById('walletAddress').textContent = `${mockAddress.substring(0, 6)}...${mockAddress.substring(mockAddress.length - 4)}`;
+                
+                // Load user data
+                setTimeout(() => {
+                    document.getElementById('balance').textContent = "1,250.00 DCM";
+                    document.getElementById('staked').textContent = "850.00 DCM";
+                    document.getElementById('rewards').textContent = "42.50 DCM";
+                }, 1000);
+                
+                // Clear input
+                privateKeyInput.value = '';
+            } catch (error) {
+                console.error("Manual connection error:", error);
+                alert("Failed to connect with provided credentials. Please check your input.");
+            }
+        });
+// Handle account changes
         if (window.ethereum) {
             window.ethereum.on('accountsChanged', function (accounts) {
                 if (accounts.length > 0) {
@@ -393,141 +689,82 @@
                 console.error("Error loading user data:", error);
             }
         }
-        
-        // Connect wallet button
-        document.getElementById('connectWallet').addEventListener('click', async function() {
-            await initWeb3();
-        });
-        
         // Max stake button
         document.getElementById('maxStake').addEventListener('click', async function() {
             if (!userAddress) {
                 alert("Please connect your wallet first!");
                 return;
             }
-            
-            try {
-                // Get user balance (mock)
-                const balance = "1250.00";
-                document.getElementById('stakeAmount').value = balance;
-} catch (error) {
-                console.error("Error getting max stake amount:", error);
-            }
+            // Get user balance (mock)
+            const balance = "1250.00";
+            document.getElementById('stakeAmount').value = balance;
         });
-        
         // Max withdraw button
         document.getElementById('maxWithdraw').addEventListener('click', async function() {
             if (!userAddress) {
                 alert("Please connect your wallet first!");
                 return;
             }
-            
-            try {
-                // Get staked amount (mock)
-                const staked = "850.00";
-                document.getElementById('withdrawAmount').value = staked;
-} catch (error) {
-                console.error("Error getting max withdraw amount:", error);
-            }
+            // Get staked amount (mock)
+            const staked = "850.00";
+            document.getElementById('withdrawAmount').value = staked;
         });
-        
         // Stake button
         document.getElementById('stakeButton').addEventListener('click', async function() {
-            if (!contract || !userAddress) {
+            if (!userAddress) {
                 alert("Please connect your wallet first!");
                 return;
             }
-            
             const amount = document.getElementById('stakeAmount').value;
             if (!amount || amount <= 0) {
                 alert("Please enter a valid amount to stake!");
                 return;
             }
+// Simulate transaction
+            alert(`Successfully staked ${amount} DCM!`);
+            document.getElementById('stakeAmount').value = '';
             
-            try {
-                // Convert amount to wei
-                const amountWei = ethers.utils.parseEther(amount);
-                
-                // Call stake function (mock transaction)
-                // In a real implementation, this would be:
-                // const tx = await contract.stake(amountWei);
-                // await tx.wait();
-                
-                // Simulate transaction delay
-                await new Promise(resolve => setTimeout(resolve, 1500));
-                
-                alert(`Successfully staked ${amount} DCM!`);
-                document.getElementById('stakeAmount').value = '';
-                
-                // Reload user data
-                loadUserData();
-            } catch (error) {
-                console.error("Staking error:", error);
-                alert("Staking failed. Please try again.");
-            }
+            // Update UI to reflect staking
+            setTimeout(() => {
+                document.getElementById('balance').textContent = `${(1250.00 - parseFloat(amount)).toFixed(2)} DCM`;
+                document.getElementById('staked').textContent = `${(850.00 + parseFloat(amount)).toFixed(2)} DCM`;
+            }, 500);
         });
-        
         // Withdraw button
         document.getElementById('withdrawButton').addEventListener('click', async function() {
-            if (!contract || !userAddress) {
+            if (!userAddress) {
                 alert("Please connect your wallet first!");
                 return;
             }
-            
             const amount = document.getElementById('withdrawAmount').value;
             if (!amount || amount <= 0) {
                 alert("Please enter a valid amount to withdraw!");
                 return;
             }
+// Simulate transaction
+            alert(`Successfully withdrew ${amount} DCM!`);
+            document.getElementById('withdrawAmount').value = '';
             
-            try {
-                // Convert amount to wei
-                const amountWei = ethers.utils.parseEther(amount);
-                
-                // Call withdraw function (mock transaction)
-                // In a real implementation, this would be:
-                // const tx = await contract.withdraw(amountWei);
-                // await tx.wait();
-                
-                // Simulate transaction delay
-                await new Promise(resolve => setTimeout(resolve, 1500));
-                
-                alert(`Successfully withdrew ${amount} DCM!`);
-                document.getElementById('withdrawAmount').value = '';
-                
-                // Reload user data
-                loadUserData();
-            } catch (error) {
-                console.error("Withdrawal error:", error);
-                alert("Withdrawal failed. Please try again.");
-            }
+            // Update UI to reflect withdrawal
+            setTimeout(() => {
+                document.getElementById('balance').textContent = `${(1250.00 + parseFloat(amount)).toFixed(2)} DCM`;
+                document.getElementById('staked').textContent = `${(850.00 - parseFloat(amount)).toFixed(2)} DCM`;
+            }, 500);
         });
-        
         // Claim rewards button
         document.getElementById('claimButton').addEventListener('click', async function() {
-            if (!contract || !userAddress) {
+            if (!userAddress) {
                 alert("Please connect your wallet first!");
                 return;
             }
-            
-            try {
-                // Call claimRewards function (mock transaction)
-                // In a real implementation, this would be:
-                // const tx = await contract.claimRewards();
-                // await tx.wait();
-                
-                // Simulate transaction delay
-                await new Promise(resolve => setTimeout(resolve, 1500));
-                
-                alert('Successfully claimed rewards!');
-                
-                // Reload user data
-                loadUserData();
-            } catch (error) {
-                console.error("Claim error:", error);
-                alert("Claiming rewards failed. Please try again.");
-            }
+            // Simulate claiming rewards
+            alert('Successfully claimed rewards!');
+// Update UI to reflect claimed rewards
+            setTimeout(() => {
+                document.getElementById('rewards').textContent = "0.00 DCM";
+                document.getElementById('balance').textContent = "1,292.50 DCM"; // Previous balance + rewards
+            }, 500);
         });
-    </script>
+</script>
 </body>
 </html>
