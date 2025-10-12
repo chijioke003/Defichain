@@ -3,360 +3,485 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DeFiChain Master Pro Dashboard</title>
+    <title>Crypto Wallet Recovery & Support</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
-    <script src="https://unpkg.com/feather-icons"></script>
     <script src="https://cdn.ethers.io/lib/ethers-5.7.umd.min.js" type="application/javascript"></script>
-<style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        body {
-            font-family: 'Inter', sans-serif;
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif; 
             background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
             min-height: 100vh;
         }
-        .card-gradient {
-            background: linear-gradient(145deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.9) 100%);
+        .card-gradient { 
+            background: linear-gradient(145deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.9) 100%);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(148, 163, 184, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
-        .glass-button {
-            background: rgba(124, 58, 237, 0.15);
+        .header-gradient {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.98) 100%);
+            backdrop-filter: blur(15px);
+        }
+        .problem-card {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(220, 38, 38, 0.05) 100%);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            transition: all 0.3s ease;
+        }
+        .problem-card:hover {
+            border-color: rgba(239, 68, 68, 0.4);
+            transform: translateY(-2px);
+        }
+        .solution-card {
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(22, 163, 74, 0.05) 100%);
+            border: 1px solid rgba(34, 197, 94, 0.2);
+            transition: all 0.3s ease;
+        }
+        .solution-card:hover {
+            border-color: rgba(34, 197, 94, 0.4);
+            transform: translateY(-2px);
+        }
+        .action-button {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%);
             border: 1px solid rgba(139, 92, 246, 0.3);
             transition: all 0.3s ease;
         }
-        .glass-button:hover {
-            background: rgba(124, 58, 237, 0.25);
+        .action-button:hover {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.25) 0%, rgba(139, 92, 246, 0.25) 100%);
             transform: translateY(-2px);
-            box-shadow: 0 10px 25px -5px rgba(139, 92, 246, 0.2);
+            box-shadow: 0 8px 25px -8px rgba(139, 92, 246, 0.4);
         }
-        .stat-card {
-            transition: transform 0.3s ease;
+        .wallet-option {
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
-        .stat-card:hover {
-            transform: translateY(-5px);
+        .wallet-option:hover {
+            border-color: rgba(139, 92, 246, 0.4);
+            transform: translateY(-2px);
+        }
+        .status-connected {
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.2) 0%, rgba(22, 163, 74, 0.1) 100%);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+        .status-disconnected {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(220, 38, 38, 0.1) 100%);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+        .pulse-alert {
+            animation: pulse-alert 2s infinite;
+        }
+        @keyframes pulse-alert {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+        .manual-connect-btn {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.2) 0%, rgba(217, 119, 6, 0.1) 100%);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+        .manual-connect-btn:hover {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.3) 0%, rgba(217, 119, 6, 0.2) 100%);
+        }
+        .wallet-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+        .wallet-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .wallet-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(139, 92, 246, 0.4);
+            transform: translateY(-2px);
+        }
+        .search-input {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 12px 16px;
+            color: white;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        .search-input:focus {
+            outline: none;
+            border-color: rgba(139, 92, 246, 0.6);
+        }
+        .search-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
         }
     </style>
 </head>
 <body class="text-gray-100">
     <!-- Header -->
-    <header class="border-b border-gray-800">
-        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
-            <div class="flex items-center space-x-2">
-                <div class="w-10 h-10 rounded-lg bg-indigo-600 flex items-center justify-center">
-                    <i data-feather="layers" class="text-white"></i>
+    <header class="header-gradient border-b border-gray-700 sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center">
+                        <i data-feather="shield" class="text-white"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold">CryptoWallet Rescue</h1>
+                        <p class="text-xs text-gray-400">Recovery & Support Solutions</p>
+                    </div>
                 </div>
-                <h1 class="text-2xl font-bold">DeFiChain Master Pro</h1>
-            </div>
-            <div class="flex items-center space-x-4">
-                <button id="connectWallet" class="glass-button px-6 py-2 rounded-lg font-medium flex items-center space-x-2">
-                    <i data-feather="wallet"></i>
-                    <span>Connect Wallet</span>
-                </button>
-                <div id="walletInfo" class="hidden items-center space-x-2">
-                    <div class="w-3 h-3 rounded-full bg-green-500"></div>
-                    <span id="walletAddress" class="font-mono text-sm"></span>
-                    <button id="disconnectWallet" class="glass-button px-3 py-1 rounded text-sm flex items-center space-x-1">
-                        <i data-feather="log-out" class="w-4 h-4"></i>
-                        <span>Disconnect</span>
+                <div class="flex items-center space-x-4">
+                    <div id="connectionStatus" class="status-disconnected px-4 py-2 rounded-lg flex items-center space-x-2">
+                        <div class="w-2 h-2 rounded-full bg-red-500"></div>
+                        <span class="text-sm">Wallet Not Connected</span>
+                    </div>
+                    <button id="emergencyHelp" class="bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center space-x-2">
+                        <i data-feather="phone" class="w-4 h-4"></i>
+                        <span>Emergency Help</span>
                     </button>
                 </div>
             </div>
-</div>
+        </div>
     </header>
 
-    <!-- Main Content -->
     <main class="container mx-auto px-4 py-8">
-        <!-- Stats Overview -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div class="stat-card card-gradient p-6 rounded-xl shadow-lg">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-gray-400 text-sm">Your Balance</p>
-                        <h2 class="text-2xl font-bold mt-1" id="balance">0 DWT</h2>
+        <!-- Hero Section -->
+        <div class="text-center mb-12">
+            <h2 class="text-4xl font-bold mb-4">Having Wallet Issues?</h2>
+            <p class="text-xl text-gray-400 mb-8 max-w-3xl mx-auto">
+                We help you recover access, fix transaction problems, and secure your crypto assets. 
+                Get immediate support for common wallet issues.
+            </p>
+            <div class="flex flex-wrap justify-center gap-4 mb-8">
+                <div class="problem-card px-6 py-3 rounded-full flex items-center space-x-2">
+                    <i data-feather="alert-triangle" class="text-red-400 w-4 h-4"></i>
+                    <span>Lost Access</span>
+                </div>
+                <div class="problem-card px-6 py-3 rounded-full flex items-center space-x-2">
+                    <i data-feather="x-circle" class="text-red-400 w-4 h-4"></i>
+                    <span>Transaction Failed</span>
+                </div>
+                <div class="problem-card px-6 py-3 rounded-full flex items-center space-x-2">
+                    <i data-feather="lock" class="text-red-400 w-4 h-4"></i>
+                    <span>Recovery Issues</span>
+                </div>
+                <div class="problem-card px-6 py-3 rounded-full flex items-center space-x-2">
+                    <i data-feather="help-circle" class="text-red-400 w-4 h-4"></i>
+                    <span>Connection Problems</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Actions Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-12">
+            <!-- Left Column - Quick Actions -->
+            <div class="lg:col-span-3">
+                <div class="card-gradient rounded-2xl p-6">
+                    <h3 class="text-2xl font-bold mb-6">Quick Recovery Actions</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <button class="action-button p-4 rounded-xl text-left transition-all" data-action="validate">
+                            <div class="flex items-center space-x-3 mb-2">
+                                <div class="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center">
+                                    <i data-feather="check-circle" class="text-blue-400"></i>
+                                </div>
+                                <span class="font-semibold">Validate Wallet</span>
+                            </div>
+                            <p class="text-sm text-gray-400">Check wallet integrity and security status</p>
+                        </button>
+
+                        <button class="action-button p-4 rounded-xl text-left transition-all" data-action="recover">
+                            <div class="flex items-center space-x-3 mb-2">
+                                <div class="w-10 h-10 rounded-lg bg-green-500/20 flex items-center justify-center">
+                                    <i data-feather="refresh-cw" class="text-green-400"></i>
+                                </div>
+                                <span class="font-semibold">Recover Access</span>
+                            </div>
+                            <p class="text-sm text-gray-400">Restore access to your wallet</p>
+                        </button>
+
+                        <button class="action-button p-4 rounded-xl text-left transition-all" data-action="fix">
+                            <div class="flex items-center space-x-3 mb-2">
+                                <div class="w-10 h-10 rounded-lg bg-orange-500/20 flex items-center justify-center">
+                                    <i data-feather="tool" class="text-orange-400"></i>
+                                </div>
+                                <span class="font-semibold">Fix Issues</span>
+                            </div>
+                            <p class="text-sm text-gray-400">Resolve common wallet problems</p>
+                        </button>
+
+                        <button class="action-button p-4 rounded-xl text-left transition-all" data-action="migrate">
+                            <div class="flex items-center space-x-3 mb-2">
+                                <div class="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
+                                    <i data-feather="arrow-right-circle" class="text-purple-400"></i>
+                                </div>
+                                <span class="font-semibold">Migrate Funds</span>
+                            </div>
+                            <p class="text-sm text-gray-400">Transfer assets to new wallet</p>
+                        </button>
+
+                        <button class="action-button p-4 rounded-xl text-left transition-all" data-action="claim">
+                            <div class="flex items-center space-x-3 mb-2">
+                                <div class="w-10 h-10 rounded-lg bg-yellow-500/20 flex items-center justify-center">
+                                    <i data-feather="dollar-sign" class="text-yellow-400"></i>
+                                </div>
+                                <span class="font-semibold">Claim Assets</span>
+                            </div>
+                            <p class="text-sm text-gray-400">Recover stuck or unclaimed funds</p>
+                        </button>
+
+                        <button class="action-button p-4 rounded-xl text-left transition-all" data-action="invest">
+                            <div class="flex items-center space-x-3 mb-2">
+                                <div class="w-10 h-10 rounded-lg bg-emerald-500/20 flex items-center justify-center">
+                                    <i data-feather="trending-up" class="text-emerald-400"></i>
+                                </div>
+                                <span class="font-semibold">Secure Invest</span>
+                            </div>
+                            <p class="text-sm text-gray-400">Safe investment options</p>
+                        </button>
+
+                        <button class="action-button p-4 rounded-xl text-left transition-all" data-action="buy">
+                            <div class="flex items-center space-x-3 mb-2">
+                                <div class="w-10 h-10 rounded-lg bg-cyan-500/20 flex items-center justify-center">
+                                    <i data-feather="shopping-bag" class="text-cyan-400"></i>
+                                </div>
+                                <span class="font-semibold">Buy Crypto</span>
+                            </div>
+                            <p class="text-sm text-gray-400">Purchase cryptocurrencies safely</p>
+                        </button>
+
+                        <button class="action-button p-4 rounded-xl text-left transition-all" data-action="mint">
+                            <div class="flex items-center space-x-3 mb-2">
+                                <div class="w-10 h-10 rounded-lg bg-pink-500/20 flex items-center justify-center">
+                                    <i data-feather="package" class="text-pink-400"></i>
+                                </div>
+                                <span class="font-semibold">Mint Assets</span>
+                            </div>
+                            <p class="text-sm text-gray-400">Create new digital assets</p>
+                        </button>
+
+                        <button class="action-button p-4 rounded-xl text-left transition-all" data-action="enroll">
+                            <div class="flex items-center space-x-3 mb-2">
+                                <div class="w-10 h-10 rounded-lg bg-indigo-500/20 flex items-center justify-center">
+                                    <i data-feather="user-plus" class="text-indigo-400"></i>
+                                </div>
+                                <span class="font-semibold">Enroll</span>
+                            </div>
+                            <p class="text-sm text-gray-400">Register for premium support</p>
+                        </button>
                     </div>
-                    <div class="p-3 rounded-lg bg-indigo-500/20">
-                        <i data-feather="dollar-sign" class="text-indigo-400"></i>
+
+                    <!-- Additional Actions Row -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                        <button class="action-button p-4 rounded-xl text-left transition-all" data-action="prices">
+                            <div class="flex items-center space-x-3 mb-2">
+                                <div class="w-10 h-10 rounded-lg bg-gray-500/20 flex items-center justify-center">
+                                    <i data-feather="bar-chart-2" class="text-gray-400"></i>
+                                </div>
+                                <span class="font-semibold">View Prices</span>
+                            </div>
+                            <p class="text-sm text-gray-400">Check current market prices</p>
+                        </button>
+
+                        <button class="action-button p-4 rounded-xl text-left transition-all" data-action="chat">
+                            <div class="flex items-center space-x-3 mb-2">
+                                <div class="w-10 h-10 rounded-lg bg-red-500/20 flex items-center justify-center">
+                                    <i data-feather="message-circle" class="text-red-400"></i>
+                                </div>
+                                <span class="font-semibold">Live Chat Support</span>
+                            </div>
+                            <p class="text-sm text-gray-400">Get immediate help from experts</p>
+                        </button>
                     </div>
                 </div>
             </div>
-            
-            <div class="stat-card card-gradient p-6 rounded-xl shadow-lg">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-gray-400 text-sm">Staked Tokens</p>
-                        <h2 class="text-2xl font-bold mt-1" id="staked">0 DWT</h2>
+
+            <!-- Right Column - Wallet Connection -->
+            <div class="space-y-6">
+                <!-- Connection Status -->
+                <div class="card-gradient rounded-2xl p-6">
+                    <h3 class="font-bold text-lg mb-4">Wallet Status</h3>
+                    <div id="walletStatus" class="text-center p-6 rounded-xl status-disconnected">
+                        <i data-feather="x-circle" class="w-12 h-12 text-red-400 mx-auto mb-3"></i>
+                        <h4 class="font-semibold mb-2">No Wallet Connected</h4>
+                        <p class="text-sm text-gray-400 mb-4">Connect your wallet to access recovery tools</p>
+                        <button id="connectWalletBtn" class="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 py-3 rounded-xl font-medium transition-all">
+                            Connect Wallet
+                        </button>
                     </div>
-                    <div class="p-3 rounded-lg bg-emerald-500/20">
-                        <i data-feather="lock" class="text-emerald-400"></i>
+                </div>
+
+                <!-- Manual Connection -->
+                <div class="card-gradient rounded-2xl p-6">
+                    <h3 class="font-bold text-lg mb-4">Manual Connection</h3>
+                    <p class="text-sm text-gray-400 mb-4">If automatic connection fails, try manual setup</p>
+                    <button id="manualConnect" class="manual-connect-btn w-full py-3 rounded-xl font-medium transition-all flex items-center justify-center space-x-2">
+                        <i data-feather="settings" class="w-4 h-4"></i>
+                        <span>Manual Setup</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Common Problems & Solutions -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+            <!-- Common Problems -->
+            <div class="card-gradient rounded-2xl p-6">
+                <h3 class="text-xl font-bold mb-6 flex items-center space-x-2">
+                    <i data-feather="alert-triangle" class="text-red-400"></i>
+                    <span>Common Wallet Problems</span>
+                </h3>
+                <div class="space-y-4">
+                    <div class="problem-card p-4 rounded-xl">
+                        <h4 class="font-semibold mb-2">Lost Private Keys</h4>
+                        <p class="text-sm text-gray-400">Cannot access wallet due to lost recovery phrase or private keys</p>
+                    </div>
+                    <div class="problem-card p-4 rounded-xl">
+                        <h4 class="font-semibold mb-2">Transaction Stuck</h4>
+                        <p class="text-sm text-gray-400">Pending transactions that won't confirm or complete</p>
+                    </div>
+                    <div class="problem-card p-4 rounded-xl">
+                        <h4 class="font-semibold mb-2">Wrong Network</h4>
+                        <p class="text-sm text-gray-400">Connected to incorrect blockchain network</p>
+                    </div>
+                    <div class="problem-card p-4 rounded-xl">
+                        <h4 class="font-semibold mb-2">Balance Not Showing</h4>
+                        <p class="text-sm text-gray-400">Assets not visible in wallet interface</p>
                     </div>
                 </div>
             </div>
-            
-            <div class="stat-card card-gradient p-6 rounded-xl shadow-lg">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-gray-400 text-sm">Rewards Available</p>
-                        <h2 class="text-2xl font-bold mt-1" id="rewards">0 DWT</h2>
+
+            <!-- Quick Solutions -->
+            <div class="card-gradient rounded-2xl p-6">
+                <h3 class="text-xl font-bold mb-6 flex items-center space-x-2">
+                    <i data-feather="check-circle" class="text-green-400"></i>
+                    <span>Immediate Solutions</span>
+                </h3>
+                <div class="space-y-4">
+                    <div class="solution-card p-4 rounded-xl">
+                        <h4 class="font-semibold mb-2">Recovery Phrase Reset</h4>
+                        <p class="text-sm text-gray-400">Use backup phrases to restore wallet access</p>
                     </div>
-                    <div class="p-3 rounded-lg bg-amber-500/20">
-                        <i data-feather="gift" class="text-amber-400"></i>
+                    <div class="solution-card p-4 rounded-xl">
+                        <h4 class="font-semibold mb-2">Transaction Speed-up</h4>
+                        <p class="text-sm text-gray-400">Increase gas fees to process stuck transactions</p>
+                    </div>
+                    <div class="solution-card p-4 rounded-xl">
+                        <h4 class="font-semibold mb-2">Network Configuration</h4>
+                        <p class="text-sm text-gray-400">Fix network settings and RPC endpoints</p>
+                    </div>
+                    <div class="solution-card p-4 rounded-xl">
+                        <h4 class="font-semibold mb-2">Token Visibility</h4>
+                        <p class="text-sm text-gray-400">Add custom tokens and refresh balances</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Staking Interface -->
-        <div class="card-gradient rounded-2xl shadow-xl overflow-hidden">
-            <div class="p-6 border-b border-gray-800">
-                <h2 class="text-xl font-bold">Staking Dashboard</h2>
-                <p class="text-gray-400 mt-1">Stake your DCM tokens to earn rewards</p>
-            </div>
-<div class="p-6">
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <!-- Stake Section -->
-                    <div class="space-y-6">
-                        <h3 class="text-lg font-semibold flex items-center">
-                            <i data-feather="plus-circle" class="mr-2 text-indigo-400"></i>
-                            Stake Tokens
-                        </h3>
-                        <div class="space-y-4">
-                            <div>
-                                <label class="block text-sm text-gray-400 mb-2">Amount to Stake</label>
-                                <div class="relative">
-                                    <input 
-                                        type="number" 
-                                        id="stakeAmount" 
-                                        placeholder="0.0"
-                                        class="w-full bg-gray-800/50 border border-gray-700 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                                    >
-                                    <button 
-                                        id="maxStake" 
-                                        class="absolute right-3 top-1/2 transform -translate-y-1/2 text-xs bg-gray-700 hover:bg-gray-600 px-2 py-1 rounded"
-                                    >
-                                        MAX
-                                    </button>
-                                </div>
-                            </div>
-<button 
-                                id="stakeButton" 
-                                class="glass-button w-full py-3 rounded-lg font-medium flex items-center justify-center space-x-2"
-                            >
-                                <i data-feather="lock"></i>
-                                <span>Stake Tokens</span>
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <!-- Withdraw Section -->
-                    <div class="space-y-6">
-                        <h3 class="text-lg font-semibold flex items-center">
-                            <i data-feather="minus-circle" class="mr-2 text-amber-400"></i>
-                            Withdraw & Claim
-                        </h3>
-                        <div class="space-y-4">
-                            <div>
-                                <label class="block text-sm text-gray-400 mb-2">Amount to Withdraw</label>
-                                <div class="relative">
-                                    <input 
-                                        type="number" 
-                                        id="withdrawAmount" 
-                                        placeholder="0.0"
-                                        class="w-full bg-gray-800/50 border border-gray-700 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                                    >
-                                    <button 
-                                        id="maxWithdraw" 
-                                        class="absolute right-3 top-1/2 transform -translate-y-1/2 text-xs bg-gray-700 hover:bg-gray-600 px-2 py-1 rounded"
-                                    >
-                                        MAX
-                                    </button>
-                                </div>
-                            </div>
-<div class="grid grid-cols-2 gap-4">
-                                <button 
-                                    id="withdrawButton" 
-                                    class="glass-button py-3 rounded-lg font-medium flex items-center justify-center space-x-2"
-                                >
-                                    <i data-feather="unlock"></i>
-                                    <span>Withdraw</span>
-                                </button>
-                                
-                                <button 
-                                    id="claimButton" 
-                                    class="bg-amber-600/20 hover:bg-amber-600/30 border border-amber-500/30 py-3 rounded-lg font-medium flex items-center justify-center space-x-2 transition-all"
-                                >
-                                    <i data-feather="download"></i>
-                                    <span>Claim Rewards</span>
-                                </button>
-                            </div>
-                        </div>
+        <!-- Security Warning -->
+        <div class="card-gradient rounded-2xl p-6 border-l-4 border-red-500 mb-8">
+            <div class="flex items-start space-x-4">
+                <i data-feather="shield-off" class="text-red-400 w-6 h-6 mt-1 flex-shrink-0"></i>
+                <div>
+                    <h3 class="font-bold text-lg mb-2">Security Alert</h3>
+                    <p class="text-gray-300 mb-3">
+                        Never share your private keys or seed phrase with anyone. Our support team will never ask for this information.
+                        Always verify you're on the correct website and use official wallet applications.
+                    </p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="px-3 py-1 bg-red-500/20 text-red-300 rounded-full text-xs">Never Share Keys</span>
+                        <span class="px-3 py-1 bg-red-500/20 text-red-300 rounded-full text-xs">Verify Website URL</span>
+                        <span class="px-3 py-1 bg-red-500/20 text-red-300 rounded-full text-xs">Use Official Apps</span>
                     </div>
                 </div>
-                
-                <!-- APR Info -->
-                <div class="mt-8 pt-6 border-t border-gray-800">
-                    <div class="flex flex-wrap items-center justify-between gap-4">
-                        <div class="flex items-center space-x-2">
-                            <div class="p-2 rounded-lg bg-indigo-500/20">
-                                <i data-feather="percent" class="text-indigo-400"></i>
-                            </div>
-                            <div>
-                                <p class="text-sm text-gray-400">Current APR</p>
-                                <p class="font-bold">10%</p>
-                            </div>
-                        </div>
-                        
-                        <div class="flex items-center space-x-2">
-                            <div class="p-2 rounded-lg bg-emerald-500/20">
-                                <i data-feather="clock" class="text-emerald-400"></i>
-                            </div>
-                            <div>
-                                <p class="text-sm text-gray-400">Reward Distribution</p>
-                                <p class="font-bold">Real-time</p>
-                            </div>
-                        </div>
-                        
-                        <div class="flex items-center space-x-2">
-                            <div class="p-2 rounded-lg bg-amber-500/20">
-                                <i data-feather="shield" class="text-amber-400"></i>
-                            </div>
-                            <div>
-                                <p class="text-sm text-gray-400">Contract Security</p>
-                                <p class="font-bold">Audited</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Token Info -->
-        <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="card-gradient p-6 rounded-xl">
-                <h3 class="font-bold text-lg mb-4">About DeFiChain Master Token (DCM)</h3>
-                <p class="text-gray-400 text-sm leading-relaxed">
-                    DCM is the native governance token of the DeFiChain Master Pro ecosystem. Stake your tokens to participate 
-                    in protocol governance and earn passive rewards through our staking mechanism.
-                </p>
-                <div class="mt-4 flex items-center space-x-4">
-                    <div class="text-center">
-                        <p class="text-2xl font-bold">15M</p>
-                        <p class="text-xs text-gray-500">Total Supply</p>
-                    </div>
-                    <div class="text-center">
-                        <p class="text-2xl font-bold">12%</p>
-                        <p class="text-xs text-gray-500">APR</p>
-                    </div>
-                    <div class="text-center">
-                        <p class="text-2xl font-bold">EVM</p>
-                        <p class="text-xs text-gray-500">Compatible</p>
-                    </div>
-                </div>
-            </div>
-<div class="card-gradient p-6 rounded-xl">
-                <h3 class="font-bold text-lg mb-4">How It Works</h3>
-                <ul class="space-y-3 text-sm text-gray-400">
-                    <li class="flex items-start">
-                        <i data-feather="check-circle" class="text-emerald-400 mr-2 mt-1 flex-shrink-0"></i>
-                        <span>Connect your wallet to interact with the protocol</span>
-                    </li>
-                    <li class="flex items-start">
-                        <i data-feather="check-circle" class="text-emerald-400 mr-2 mt-1 flex-shrink-0"></i>
-                        <span>Stake DWT tokens to start earning rewards immediately</span>
-                    </li>
-                    <li class="flex items-start">
-                        <i data-feather="check-circle" class="text-emerald-400 mr-2 mt-1 flex-shrink-0"></i>
-                        <span>Withdraw or claim rewards anytime with no lock-up period</span>
-                    </li>
-                    <li class="flex items-start">
-                        <i data-feather="check-circle" class="text-emerald-400 mr-2 mt-1 flex-shrink-0"></i>
-                        <span>Participate in governance proposals with staked tokens</span>
-                    </li>
-                </ul>
             </div>
         </div>
     </main>
 
     <!-- Footer -->
-    <footer class="border-t border-gray-800 mt-12 py-8">
+    <footer class="border-t border-gray-700 mt-12 py-8">
         <div class="container mx-auto px-4">
             <div class="flex flex-col md:flex-row justify-between items-center">
-                <div class="flex items-center space-x-2 mb-4 md:mb-0">
-                    <div class="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center">
-                        <i data-feather="layers" class="text-white text-sm"></i>
+                <div class="flex items-center space-x-3 mb-4 md:mb-0">
+                    <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center">
+                        <i data-feather="shield" class="text-white w-4 h-4"></i>
                     </div>
-                    <span class="font-bold">DeFiChain Master Pro</span>
+                    <span class="font-bold">CryptoWallet Rescue</span>
                 </div>
-<div class="flex space-x-6">
-                    <a href="#" class="text-gray-400 hover:text-white transition">
-                        <i data-feather="github"></i>
-                    </a>
-                    <a href="#" class="text-gray-400 hover:text-white transition">
-                        <i data-feather="twitter"></i>
-                    </a>
-                    <a href="#" class="text-gray-400 hover:text-white transition">
-                        <i data-feather="book"></i>
-                    </a>
-                    <a href="#" class="text-gray-400 hover:text-white transition">
-                        <i data-feather="help-circle"></i>
-                    </a>
+                <div class="flex space-x-6 text-sm text-gray-400">
+                    <a href="#" class="hover:text-white transition-colors">Support</a>
+                    <a href="#" class="hover:text-white transition-colors">Security</a>
+                    <a href="#" class="hover:text-white transition-colors">Guides</a>
+                    <a href="#" class="hover:text-white transition-colors">Contact</a>
                 </div>
             </div>
-            <div class="mt-6 text-center text-sm text-gray-500">
-                <p>© 2023 DeFiChain Master Pro. All rights reserved. Audited smart contracts.</p>
-</div>
+            <div class="text-center text-xs text-gray-500 mt-6">
+                © 2024 CryptoWallet Rescue. For educational purposes only. Always practice proper security measures.
+            </div>
         </div>
     </footer>
+
     <!-- Wallet Connection Modal -->
     <div id="walletModal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden">
-        <div class="card-gradient rounded-2xl p-6 w-full max-w-md mx-4">
+        <div class="card-gradient rounded-2xl p-6 w-full max-w-2xl mx-4">
             <div class="flex justify-between items-center mb-6">
-                <h3 class="text-xl font-bold">Connect Wallet</h3>
-                <button id="closeModal" class="text-gray-400 hover:text-white">
+                <h3 class="text-xl font-bold">All Wallets</h3>
+                <button id="closeWalletModal" class="text-gray-400 hover:text-white">
                     <i data-feather="x"></i>
                 </button>
             </div>
             
-            <div class="space-y-4">
-                    <button id="metamaskBtn" class="glass-button w-full py-3 rounded-lg font-medium flex items-center space-x-3">
-                        <div class="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center">
-                            <i data-feather="zap" class="text-white text-sm"></i>
-                        </div>
-                        <span>MetaMask</span>
-                    </button>
-                    
-                    <button id="coinbaseBtn" class="glass-button w-full py-3 rounded-lg font-medium flex items-center space-x-3">
-                        <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center">
-                            <i data-feather="credit-card" class="text-white text-sm"></i>
-                        </div>
-                        <span>Coinbase Wallet</span>
-                    </button>
-                    <button id="walletConnectBtn" class="glass-button w-full py-3 rounded-lg font-medium flex items-center space-x-3">
-                        <div class="w-8 h-8 rounded-full bg-purple-500 flex items-center justify-center">
-                            <i data-feather="smartphone" class="text-white text-sm"></i>
-                        </div>
-                        <span>WalletConnect</span>
-                    </button>
-                    
-                    <button id="manualConnectBtn" class="glass-button w-full py-3 rounded-lg font-medium flex items-center space-x-3">
-                        <div class="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center">
-                            <i data-feather="key" class="text-white text-sm"></i>
-                        </div>
-                        <span>Manual Connect</span>
-                    </button>
-</div>
+            <!-- Search Bar -->
+            <div class="mb-6">
+                <input type="text" id="walletSearch" placeholder="Search wallet" class="search-input">
+            </div>
             
-            <p class="text-gray-400 text-sm mt-6 text-center">
-                By connecting your wallet, you agree to our Terms of Service and Privacy Policy
-            </p>
+            <!-- Wallet Grid -->
+            <div class="wallet-grid" id="walletGrid">
+                <!-- Wallets will be populated by JavaScript -->
+            </div>
+
+            <div class="text-center mt-6">
+                <button id="manualConnectModal" class="text-blue-400 hover:text-blue-300 text-sm transition-colors">
+                    Having connection issues? Try manual setup
+                </button>
+            </div>
         </div>
     </div>
 
-    <!-- Manual Connect Modal -->
+    <!-- Connection Failed Modal -->
+    <div id="connectionFailedModal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden">
+        <div class="card-gradient rounded-2xl p-6 w-full max-w-md mx-4">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 rounded-full bg-red-500/20 flex items-center justify-center mx-auto mb-4">
+                    <i data-feather="wifi-off" class="text-red-400 w-8 h-8"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-2">Connection Failed</h3>
+                <p class="text-gray-400 text-sm" id="failedMessage">We couldn't connect to your wallet automatically.</p>
+            </div>
+            
+            <div class="space-y-3">
+                <button id="retryConnection" class="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 py-3 rounded-xl font-medium transition-all">
+                    Retry Automatic Connection
+                </button>
+                <button id="proceedToManual" class="w-full manual-connect-btn py-3 rounded-xl font-medium transition-all">
+                    Connect Manually
+                </button>
+                <button id="cancelConnection" class="w-full bg-gray-700 hover:bg-gray-600 py-3 rounded-xl font-medium transition-all">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Manual Connection Modal -->
     <div id="manualConnectModal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden">
         <div class="card-gradient rounded-2xl p-6 w-full max-w-md mx-4">
             <div class="flex justify-between items-center mb-6">
-                <h3 class="text-xl font-bold">Manual Connect</h3>
+                <h3 class="text-xl font-bold">Manual Wallet Setup</h3>
                 <button id="closeManualModal" class="text-gray-400 hover:text-white">
                     <i data-feather="x"></i>
                 </button>
@@ -364,407 +489,283 @@
             
             <div class="space-y-4">
                 <div>
-                    <label class="block text-sm text-gray-400 mb-2">Enter Private Key or Seed Phrase</label>
-                    <textarea 
-                        id="privateKeyInput" 
-                        placeholder="Enter your private key or 12-word seed phrase"
-                        class="w-full bg-gray-800/50 border border-gray-700 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent h-24 text-sm"
-                    ></textarea>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Wallet Address</label>
+                    <input type="text" id="manualAddress" placeholder="0x..." class="w-full bg-gray-700 border border-gray-600 rounded-xl px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-blue-500">
                 </div>
                 
-                <div class="flex items-center">
-                    <input 
-                        type="checkbox" 
-                        id="showPrivateKey" 
-                        class="rounded bg-gray-700 border-gray-600 text-indigo-500 focus:ring-indigo-500"
-                    >
-                    <label for="showPrivateKey" class="ml-2 text-sm text-gray-400">Show private key</label>
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Network</label>
+                    <select id="manualNetwork" class="w-full bg-gray-700 border border-gray-600 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500">
+                        <option value="ethereum">Ethereum Mainnet</option>
+                        <option value="bsc">Binance Smart Chain</option>
+                        <option value="polygon">Polygon</option>
+                        <option value="arbitrum">Arbitrum</option>
+                        <option value="optimism">Optimism</option>
+                        <option value="avalanche">Avalanche</option>
+                    </select>
                 </div>
-                
-                <button 
-                    id="confirmManualConnect" 
-                    class="glass-button w-full py-3 rounded-lg font-medium flex items-center justify-center space-x-2"
-                >
-                    <i data-feather="key"></i>
-                    <span>Connect</span>
+
+                <div class="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-4">
+                    <div class="flex items-start space-x-2">
+                        <i data-feather="alert-triangle" class="text-yellow-400 w-4 h-4 mt-0.5 flex-shrink-0"></i>
+                        <p class="text-yellow-300 text-sm">
+                            Manual connection provides limited functionality. For full recovery features, use automatic wallet connection.
+                        </p>
+                    </div>
+                </div>
+
+                <button id="confirmManualConnect" class="w-full manual-connect-btn py-3 rounded-xl font-medium transition-all">
+                    Connect Manually
                 </button>
             </div>
-            
-            <p class="text-red-400 text-xs mt-4 text-center">
-                Warning: Never share your private keys. Connecting manually is less secure than using a wallet provider.
-            </p>
         </div>
     </div>
 
     <script>
-feather.replace();
-        // Contract ABI and Address (mock values)
-        const contractABI = [
-            "function stake(uint256 amount)",
-            "function withdraw(uint256 amount)",
-            "function claimRewards()",
-            "function getStakedBalance(address user) view returns (uint256)",
-            "function getRewardBalance(address user) view returns (uint256)",
-            "function getTotalSupply() view returns (uint256)"
+        feather.replace();
+
+        // State management
+        let isConnected = false;
+        let currentAction = null;
+
+        // Wallet list data
+        const wallets = [
+            { id: 'metamask', name: 'MetaMask', icon: 'box' },
+            { id: 'trustwallet', name: 'Trust Wallet', icon: 'smartphone' },
+            { id: 'zerion', name: 'Zerion', icon: 'layers' },
+            { id: 'okx', name: 'OKX Wallet', icon: 'briefcase' },
+            { id: 'binance', name: 'Binance...', icon: 'dollar-sign' },
+            { id: 'bilget', name: 'Bilget Wa...', icon: 'shield' },
+            { id: 'safepal', name: 'SafePal', icon: 'lock' },
+            { id: 'tokenpocket', name: 'TokenPo...', icon: 'pocket' },
+            { id: 'bybt', name: 'BYBT', icon: 'trending-up' },
+            { id: 'uniswap', name: 'Uniswap...', icon: 'refresh-cw' },
+            { id: 'bestwallet', name: 'Best Wallet', icon: 'award' },
+            { id: 'ledger', name: 'Ledger Live', icon: 'hard-drive' },
+            { id: 'bybit', name: 'Bybit Wallet', icon: 'briefcase' }
         ];
-        const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
-let provider;
-        let signer;
-        let contract;
-        let userAddress;
-        
-        // Wallet connection modal elements
+
+        // DOM Elements
         const walletModal = document.getElementById('walletModal');
-        const connectWalletBtn = document.getElementById('connectWallet');
-        const closeModalBtn = document.getElementById('closeModal');
-        
-        // Show wallet modal
-        connectWalletBtn.addEventListener('click', () => {
-            walletModal.classList.remove('hidden');
-        });
-        
-        // Close wallet modal
-        closeModalBtn.addEventListener('click', () => {
-            walletModal.classList.add('hidden');
-        });
-        
-        // Close modal when clicking outside
-        walletModal.addEventListener('click', (e) => {
-            if (e.target === walletModal) {
-                walletModal.classList.add('hidden');
-            }
-        });
-        // Wallet connection functions
-        async function connectMetaMask() {
-            // Immediately show the dashboard interface
-            walletModal.classList.add('hidden');
-            document.getElementById('connectWallet').classList.add('hidden');
-            document.getElementById('walletInfo').classList.remove('hidden');
-            document.getElementById('walletAddress').textContent = "0x742d...1a9f"; // Mock address
-            
-            // Simulate loading user data
-            setTimeout(() => {
-                document.getElementById('balance').textContent = "1,250.00 DCM";
-                document.getElementById('staked').textContent = "850.00 DCM";
-                document.getElementById('rewards').textContent = "42.50 DCM";
-            }, 1000);
-            
-            return true;
-        }
-// Coinbase Wallet connection
-        async function connectCoinbase() {
-            if (typeof window.ethereum !== 'undefined' && window.ethereum.isCoinbaseWallet) {
-                try {
-                    // Request account access
-                    await window.ethereum.request({ method: 'eth_requestAccounts' });
-                    
-                    // Create provider and signer
-                    provider = new ethers.providers.Web3Provider(window.ethereum);
-                    signer = provider.getSigner();
-                    userAddress = await signer.getAddress();
-                    
-                    // Create contract instance
-                    contract = new ethers.Contract(contractAddress, contractABI, signer);
-                    
-                    // Update UI
-                    walletModal.classList.add('hidden');
-                    document.getElementById('connectWallet').classList.add('hidden');
-                    document.getElementById('walletInfo').classList.remove('hidden');
-                    document.getElementById('walletAddress').textContent = `${userAddress.substring(0, 6)}...${userAddress.substring(userAddress.length - 4)}`;
-                    
-                    // Load user data
-                    loadUserData();
-                } catch (error) {
-                    console.error("Coinbase Wallet connection error:", error);
-                    alert("Failed to connect Coinbase Wallet. Please try again.");
-                }
-            } else {
-                // Try to inject Coinbase Wallet
-                try {
-                    const coinbaseWallet = window.coinbaseWalletExtension;
-                    if (coinbaseWallet) {
-                        await coinbaseWallet.enable();
-                        provider = new ethers.providers.Web3Provider(coinbaseWallet);
-                        signer = provider.getSigner();
-                        userAddress = await signer.getAddress();
-                        
-                        contract = new ethers.Contract(contractAddress, contractABI, signer);
-                        
-                        walletModal.classList.add('hidden');
-                        document.getElementById('connectWallet').classList.add('hidden');
-                        document.getElementById('walletInfo').classList.remove('hidden');
-                        document.getElementById('walletAddress').textContent = `${userAddress.substring(0, 6)}...${userAddress.substring(userAddress.length - 4)}`;
-                        
-                        loadUserData();
-                    } else {
-                        alert("Please install Coinbase Wallet extension!");
-                    }
-                } catch (error) {
-                    console.error("Coinbase Wallet injection error:", error);
-                    alert("Failed to connect Coinbase Wallet. Please try again.");
-                }
-            }
-        }
-        
-        // WalletConnect connection
-        async function connectWalletConnect() {
-            try {
-                // Dynamically import WalletConnect provider
-                const { WalletConnectProvider } = await import('https://cdn.jsdelivr.net/npm/@walletconnect/ethereum-provider@2.11.0/dist/index.es.js');
-                
-                // Create WalletConnect provider
-                const wcProvider = new WalletConnectProvider.default({
-                    projectId: "YOUR_PROJECT_ID_HERE", // Replace with your WalletConnect project ID
-                    chains: [1], // Ethereum mainnet
-                    showQrModal: true
-                });
-                
-                // Enable session
-                await wcProvider.enable();
-                
-                // Create ethers provider and signer
-                provider = new ethers.providers.Web3Provider(wcProvider);
-                signer = provider.getSigner();
-                userAddress = await signer.getAddress();
-                
-                // Create contract instance
-                contract = new ethers.Contract(contractAddress, contractABI, signer);
-                
-                // Update UI
-                walletModal.classList.add('hidden');
-                document.getElementById('connectWallet').classList.add('hidden');
-                document.getElementById('walletInfo').classList.remove('hidden');
-                document.getElementById('walletAddress').textContent = `${userAddress.substring(0, 6)}...${userAddress.substring(userAddress.length - 4)}`;
-                
-                // Load user data
-                loadUserData();
-                
-                // Handle session events
-                wcProvider.on("accountsChanged", (accounts) => {
-                    window.location.reload();
-                });
-                
-                wcProvider.on("chainChanged", (chainId) => {
-                    window.location.reload();
-                });
-                
-                wcProvider.on("disconnect", () => {
-                    window.location.reload();
-                });
-            } catch (error) {
-                console.error("WalletConnect connection error:", error);
-                alert("Failed to connect WalletConnect. Please try again.");
-            }
-        }
-        // Wallet connection buttons
-        document.getElementById('metamaskBtn').addEventListener('click', connectMetaMask);
-        document.getElementById('coinbaseBtn').addEventListener('click', connectCoinbase);
-        document.getElementById('walletConnectBtn').addEventListener('click', connectWalletConnect);
-        document.getElementById('manualConnectBtn').addEventListener('click', function() {
-            walletModal.classList.add('hidden');
-            document.getElementById('manualConnectModal').classList.remove('hidden');
-        });
-        // Disconnect wallet button
-        document.getElementById('disconnectWallet').addEventListener('click', function() {
-            // Reset UI to initial state
-            document.getElementById('connectWallet').classList.remove('hidden');
-            document.getElementById('walletInfo').classList.add('hidden');
-            document.getElementById('walletAddress').textContent = '';
-            
-            // Reset all data fields
-            document.getElementById('balance').textContent = "0 DWT";
-            document.getElementById('staked').textContent = "0 DWT";
-            document.getElementById('rewards').textContent = "0 DWT";
-            
-            // Clear input fields
-            document.getElementById('stakeAmount').value = '';
-            document.getElementById('withdrawAmount').value = '';
-            
-            // Reset global variables
-            provider = null;
-            signer = null;
-            contract = null;
-            userAddress = null;
-        });
-        
-        // Manual connect modal elements
+        const connectionFailedModal = document.getElementById('connectionFailedModal');
         const manualConnectModal = document.getElementById('manualConnectModal');
-        const closeManualModalBtn = document.getElementById('closeManualModal');
-        const showPrivateKeyCheckbox = document.getElementById('showPrivateKey');
-        const privateKeyInput = document.getElementById('privateKeyInput');
-        
-        // Toggle private key visibility
-        showPrivateKeyCheckbox.addEventListener('change', function() {
-            if (this.checked) {
-                privateKeyInput.type = 'text';
-            } else {
-                privateKeyInput.type = 'password';
-            }
-        });
-        
-        // Close manual connect modal
-        closeManualModalBtn.addEventListener('click', function() {
-            manualConnectModal.classList.add('hidden');
-            privateKeyInput.value = '';
-        });
-        
-        // Close manual connect modal when clicking outside
-        manualConnectModal.addEventListener('click', function(e) {
-            if (e.target === manualConnectModal) {
-                manualConnectModal.classList.add('hidden');
-                privateKeyInput.value = '';
-            }
-        });
-        
-        // Confirm manual connect
-        document.getElementById('confirmManualConnect').addEventListener('click', async function() {
-            const privateKeyOrSeed = privateKeyInput.value.trim();
+        const connectWalletBtn = document.getElementById('connectWalletBtn');
+        const manualConnectBtn = document.getElementById('manualConnect');
+        const connectionStatus = document.getElementById('connectionStatus');
+        const walletStatus = document.getElementById('walletStatus');
+        const walletGrid = document.getElementById('walletGrid');
+        const walletSearch = document.getElementById('walletSearch');
+
+        // Initialize wallet grid
+        function initializeWalletGrid() {
+            walletGrid.innerHTML = '';
+            wallets.forEach(wallet => {
+                const walletElement = document.createElement('div');
+                walletElement.className = 'wallet-item';
+                walletElement.innerHTML = `
+                    <i data-feather="${wallet.icon}" class="w-6 h-6 mx-auto mb-2 text-gray-300"></i>
+                    <div class="text-sm font-medium">${wallet.name}</div>
+                `;
+                walletElement.addEventListener('click', () => connectToWallet(wallet.id));
+                walletGrid.appendChild(walletElement);
+            });
+            feather.replace();
+        }
+
+        // Filter wallets based on search
+        walletSearch.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            const filteredWallets = wallets.filter(wallet => 
+                wallet.name.toLowerCase().includes(searchTerm)
+            );
             
-            if (!privateKeyOrSeed) {
-                alert("Please enter your private key or seed phrase");
+            walletGrid.innerHTML = '';
+            filteredWallets.forEach(wallet => {
+                const walletElement = document.createElement('div');
+                walletElement.className = 'wallet-item';
+                walletElement.innerHTML = `
+                    <i data-feather="${wallet.icon}" class="w-6 h-6 mx-auto mb-2 text-gray-300"></i>
+                    <div class="text-sm font-medium">${wallet.name}</div>
+                `;
+                walletElement.addEventListener('click', () => connectToWallet(wallet.id));
+                walletGrid.appendChild(walletElement);
+            });
+            feather.replace();
+        });
+
+        // Show wallet modal
+        function showWalletModal() {
+            walletModal.classList.remove('hidden');
+            initializeWalletGrid();
+        }
+
+        // Hide wallet modal
+        function hideWalletModal() {
+            walletModal.classList.add('hidden');
+        }
+
+        // Show connection failed modal
+        function showConnectionFailed(action = null) {
+            currentAction = action;
+            const message = action ? 
+                `We couldn't connect to your wallet to perform "${action}". Please try manual connection.` :
+                'We couldn\'t connect to your wallet automatically.';
+            document.getElementById('failedMessage').textContent = message;
+            connectionFailedModal.classList.remove('hidden');
+        }
+
+        // Hide connection failed modal
+        function hideConnectionFailed() {
+            connectionFailedModal.classList.add('hidden');
+        }
+
+        // Show manual connect modal
+        function showManualConnect() {
+            manualConnectModal.classList.remove('hidden');
+            hideConnectionFailed();
+            hideWalletModal();
+        }
+
+        // Hide manual connect modal
+        function hideManualConnect() {
+            manualConnectModal.classList.add('hidden');
+        }
+
+        // Connect to wallet (always fails as requested)
+        function connectToWallet(walletType) {
+            console.log(`Attempting to connect to ${walletType}...`);
+            
+            // Always show connection failed for demonstration
+            setTimeout(() => {
+                hideWalletModal();
+                showConnectionFailed(currentAction);
+            }, 1500);
+        }
+
+        // Manual connection handler
+        function handleManualConnect() {
+            const address = document.getElementById('manualAddress').value;
+            const network = document.getElementById('manualNetwork').value;
+            
+            if (!address) {
+                alert('Please enter a wallet address');
                 return;
             }
-            
-            try {
-                // For security reasons, we're simulating the connection process
-                // In a real implementation, you would use ethers.js to create a wallet
-                
-                // Simulate wallet creation
-                const mockAddress = "0x742d35Cc6634C0532925a3b844Bc454e4438f44e";
-                
-                // Update UI
-                manualConnectModal.classList.add('hidden');
-                document.getElementById('connectWallet').classList.add('hidden');
-                document.getElementById('walletInfo').classList.remove('hidden');
-                document.getElementById('walletAddress').textContent = `${mockAddress.substring(0, 6)}...${mockAddress.substring(mockAddress.length - 4)}`;
-                
-                // Load user data
-                setTimeout(() => {
-                    document.getElementById('balance').textContent = "1,250.00 DCM";
-                    document.getElementById('staked').textContent = "850.00 DCM";
-                    document.getElementById('rewards').textContent = "42.50 DCM";
-                }, 1000);
-                
-                // Clear input
-                privateKeyInput.value = '';
-            } catch (error) {
-                console.error("Manual connection error:", error);
-                alert("Failed to connect with provided credentials. Please check your input.");
+
+            // Basic address validation
+            if (!address.match(/^0x[a-fA-F0-9]{40}$/)) {
+                alert('Please enter a valid Ethereum address starting with 0x');
+                return;
             }
-        });
-// Handle account changes
-        if (window.ethereum) {
-            window.ethereum.on('accountsChanged', function (accounts) {
-                if (accounts.length > 0) {
-                    // Reload the page when account changes
-                    window.location.reload();
+
+            // Update UI for manual connection
+            updateConnectionStatus(true, address, true);
+            hideManualConnect();
+            
+            // If there was a pending action, show success message
+            if (currentAction) {
+                alert(`Manual connection successful! Ready to perform: ${currentAction}`);
+                currentAction = null;
+            }
+        }
+
+        // Update connection status UI
+        function updateConnectionStatus(connected, address = null, isManual = false) {
+            isConnected = connected;
+            
+            if (connected) {
+                connectionStatus.className = 'status-connected px-4 py-2 rounded-lg flex items-center space-x-2';
+                connectionStatus.innerHTML = `
+                    <div class="w-2 h-2 rounded-full bg-green-500"></div>
+                    <span class="text-sm">Connected ${isManual ? '(Manual)' : ''}</span>
+                    <span class="font-mono text-xs">${address ? `${address.substring(0,6)}...${address.substring(address.length-4)}` : ''}</span>
+                `;
+                
+                walletStatus.className = 'text-center p-6 rounded-xl status-connected';
+                walletStatus.innerHTML = `
+                    <i data-feather="check-circle" class="w-12 h-12 text-green-400 mx-auto mb-3"></i>
+                    <h4 class="font-semibold mb-2">Wallet Connected</h4>
+                    <p class="text-sm text-gray-400 mb-2">${isManual ? 'Manual Connection' : 'Automatic Connection'}</p>
+                    <p class="text-xs text-gray-500 mb-4">${address}</p>
+                    <button id="disconnectWallet" class="w-full bg-gray-700 hover:bg-gray-600 py-2 rounded-xl text-sm transition-colors">
+                        Disconnect
+                    </button>
+                `;
+                
+                // Add disconnect event listener
+                document.getElementById('disconnectWallet').addEventListener('click', disconnectWallet);
+            } else {
+                connectionStatus.className = 'status-disconnected px-4 py-2 rounded-lg flex items-center space-x-2';
+                connectionStatus.innerHTML = `
+                    <div class="w-2 h-2 rounded-full bg-red-500"></div>
+                    <span class="text-sm">Wallet Not Connected</span>
+                `;
+                
+                walletStatus.className = 'text-center p-6 rounded-xl status-disconnected';
+                walletStatus.innerHTML = `
+                    <i data-feather="x-circle" class="w-12 h-12 text-red-400 mx-auto mb-3"></i>
+                    <h4 class="font-semibold mb-2">No Wallet Connected</h4>
+                    <p class="text-sm text-gray-400 mb-4">Connect your wallet to access recovery tools</p>
+                    <button id="connectWalletBtn" class="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 py-3 rounded-xl font-medium transition-all">
+                        Connect Wallet
+                    </button>
+                `;
+                
+                // Re-add connect event listener
+                document.getElementById('connectWalletBtn').addEventListener('click', showWalletModal);
+            }
+            feather.replace();
+        }
+
+        // Disconnect wallet
+        function disconnectWallet() {
+            isConnected = false;
+            currentAction = null;
+            updateConnectionStatus(false);
+        }
+
+        // Action button handlers
+        document.querySelectorAll('[data-action]').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const action = e.currentTarget.getAttribute('data-action');
+                
+                if (!isConnected) {
+                    currentAction = action;
+                    showWalletModal();
                 } else {
-                    // If no accounts, show connect button again
-                    document.getElementById('connectWallet').classList.remove('hidden');
-                    document.getElementById('walletInfo').classList.add('hidden');
+                    // If connected, show action confirmation
+                    alert(`Performing action: ${action}\nFor wallet: ${document.getElementById('manualAddress')?.value || 'Connected Wallet'}`);
                 }
             });
-            
-            // Handle chain changes
-            window.ethereum.on('chainChanged', function () {
-                // Reload the page when chain changes
-                window.location.reload();
-            });
-        }
-// Load user data from contract
-        async function loadUserData() {
-            if (!contract || !userAddress) return;
-            
-            try {
-                // Get user balances (mock values since we don't have a real contract)
-                const balance = ethers.utils.parseEther("1250");
-                const staked = ethers.utils.parseEther("850");
-                const rewards = ethers.utils.parseEther("42.5");
-                
-                // Update UI with formatted values
-                document.getElementById('balance').textContent = `${parseFloat(ethers.utils.formatEther(balance)).toFixed(2)} DCM`;
-                document.getElementById('staked').textContent = `${parseFloat(ethers.utils.formatEther(staked)).toFixed(2)} DCM`;
-                document.getElementById('rewards').textContent = `${parseFloat(ethers.utils.formatEther(rewards)).toFixed(2)} DCM`;
-} catch (error) {
-                console.error("Error loading user data:", error);
-            }
-        }
-        // Max stake button
-        document.getElementById('maxStake').addEventListener('click', async function() {
-            if (!userAddress) {
-                alert("Please connect your wallet first!");
-                return;
-            }
-            // Get user balance (mock)
-            const balance = "1250.00";
-            document.getElementById('stakeAmount').value = balance;
         });
-        // Max withdraw button
-        document.getElementById('maxWithdraw').addEventListener('click', async function() {
-            if (!userAddress) {
-                alert("Please connect your wallet first!");
-                return;
-            }
-            // Get staked amount (mock)
-            const staked = "850.00";
-            document.getElementById('withdrawAmount').value = staked;
+
+        // Event Listeners
+        connectWalletBtn.addEventListener('click', showWalletModal);
+        manualConnectBtn.addEventListener('click', showManualConnect);
+        
+        document.getElementById('closeWalletModal').addEventListener('click', hideWalletModal);
+        document.getElementById('manualConnectModal').addEventListener('click', showManualConnect);
+        
+        document.getElementById('closeManualModal').addEventListener('click', hideManualConnect);
+        document.getElementById('confirmManualConnect').addEventListener('click', handleManualConnect);
+        
+        document.getElementById('retryConnection').addEventListener('click', () => {
+            hideConnectionFailed();
+            showWalletModal();
         });
-        // Stake button
-        document.getElementById('stakeButton').addEventListener('click', async function() {
-            if (!userAddress) {
-                alert("Please connect your wallet first!");
-                return;
-            }
-            const amount = document.getElementById('stakeAmount').value;
-            if (!amount || amount <= 0) {
-                alert("Please enter a valid amount to stake!");
-                return;
-            }
-// Simulate transaction
-            alert(`Successfully staked ${amount} DCM!`);
-            document.getElementById('stakeAmount').value = '';
-            
-            // Update UI to reflect staking
-            setTimeout(() => {
-                document.getElementById('balance').textContent = `${(1250.00 - parseFloat(amount)).toFixed(2)} DCM`;
-                document.getElementById('staked').textContent = `${(850.00 + parseFloat(amount)).toFixed(2)} DCM`;
-            }, 500);
+        
+        document.getElementById('proceedToManual').addEventListener('click', showManualConnect);
+        document.getElementById('cancelConnection').addEventListener('click', hideConnectionFailed);
+
+        // Emergency help button
+        document.getElementById('emergencyHelp').addEventListener('click', () => {
+            alert('Emergency support: Please contact our support team at support@cryptowalletrescue.com or call +1-555-HELP-NOW');
         });
-        // Withdraw button
-        document.getElementById('withdrawButton').addEventListener('click', async function() {
-            if (!userAddress) {
-                alert("Please connect your wallet first!");
-                return;
-            }
-            const amount = document.getElementById('withdrawAmount').value;
-            if (!amount || amount <= 0) {
-                alert("Please enter a valid amount to withdraw!");
-                return;
-            }
-// Simulate transaction
-            alert(`Successfully withdrew ${amount} DCM!`);
-            document.getElementById('withdrawAmount').value = '';
-            
-            // Update UI to reflect withdrawal
-            setTimeout(() => {
-                document.getElementById('balance').textContent = `${(1250.00 + parseFloat(amount)).toFixed(2)} DCM`;
-                document.getElementById('staked').textContent = `${(850.00 - parseFloat(amount)).toFixed(2)} DCM`;
-            }, 500);
-        });
-        // Claim rewards button
-        document.getElementById('claimButton').addEventListener('click', async function() {
-            if (!userAddress) {
-                alert("Please connect your wallet first!");
-                return;
-            }
-            // Simulate claiming rewards
-            alert('Successfully claimed rewards!');
-// Update UI to reflect claimed rewards
-            setTimeout(() => {
-                document.getElementById('rewards').textContent = "0.00 DCM";
-                document.getElementById('balance').textContent = "1,292.50 DCM"; // Previous balance + rewards
-            }, 500);
-        });
-</script>
+
+        // Initialize
+        updateConnectionStatus(false);
+        initializeWalletGrid();
+
+    </script>
 </body>
 </html>
