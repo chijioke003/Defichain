@@ -1,708 +1,978 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Crypto Wallet Recovery & Support</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
-    <script src="https://cdn.ethers.io/lib/ethers-5.7.umd.min.js" type="application/javascript"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script
+      src="https://cdn.ethers.io/lib/ethers-5.7.umd.min.js"
+      type="application/javascript"
+    ></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
     <style>
-        body { 
-            font-family: 'Inter', sans-serif; 
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            min-height: 100vh;
+      body {
+        font-family: "Inter", sans-serif;
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        min-height: 100vh;
+      }
+      .card-gradient {
+        background: linear-gradient(
+          145deg,
+          rgba(30, 41, 59, 0.8) 0%,
+          rgba(15, 23, 42, 0.9) 100%
+        );
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      .header-gradient {
+        background: linear-gradient(
+          135deg,
+          rgba(30, 41, 59, 0.95) 0%,
+          rgba(15, 23, 42, 0.98) 100%
+        );
+        backdrop-filter: blur(15px);
+      }
+      .problem-card {
+        background: linear-gradient(
+          135deg,
+          rgba(239, 68, 68, 0.1) 0%,
+          rgba(220, 38, 38, 0.05) 100%
+        );
+        border: 1px solid rgba(239, 68, 68, 0.2);
+        transition: all 0.3s ease;
+      }
+      .problem-card:hover {
+        border-color: rgba(239, 68, 68, 0.4);
+        transform: translateY(-2px);
+      }
+      .solution-card {
+        background: linear-gradient(
+          135deg,
+          rgba(34, 197, 94, 0.1) 0%,
+          rgba(22, 163, 74, 0.05) 100%
+        );
+        border: 1px solid rgba(34, 197, 94, 0.2);
+        transition: all 0.3s ease;
+      }
+      .solution-card:hover {
+        border-color: rgba(34, 197, 94, 0.4);
+        transform: translateY(-2px);
+      }
+      .action-button {
+        background: linear-gradient(
+          135deg,
+          rgba(99, 102, 241, 0.15) 0%,
+          rgba(139, 92, 246, 0.15) 100%
+        );
+        border: 1px solid rgba(139, 92, 246, 0.3);
+        transition: all 0.3s ease;
+      }
+      .action-button:hover {
+        background: linear-gradient(
+          135deg,
+          rgba(99, 102, 241, 0.25) 0%,
+          rgba(139, 92, 246, 0.25) 100%
+        );
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px -8px rgba(139, 92, 246, 0.4);
+      }
+      .wallet-option {
+        transition: all 0.3s ease;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      .wallet-option:hover {
+        border-color: rgba(139, 92, 246, 0.4);
+        transform: translateY(-2px);
+      }
+      .status-connected {
+        background: linear-gradient(
+          135deg,
+          rgba(34, 197, 94, 0.2) 0%,
+          rgba(22, 163, 74, 0.1) 100%
+        );
+        border: 1px solid rgba(34, 197, 94, 0.3);
+      }
+      .status-disconnected {
+        background: linear-gradient(
+          135deg,
+          rgba(239, 68, 68, 0.2) 0%,
+          rgba(220, 38, 38, 0.1) 100%
+        );
+        border: 1px solid rgba(239, 68, 68, 0.3);
+      }
+      .pulse-alert {
+        animation: pulse-alert 2s infinite;
+      }
+      @keyframes pulse-alert {
+        0% {
+          box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
         }
-        .card-gradient { 
-            background: linear-gradient(145deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.9) 100%);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+        70% {
+          box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
         }
-        .header-gradient {
-            background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.98) 100%);
-            backdrop-filter: blur(15px);
+        100% {
+          box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
         }
-        .problem-card {
-            background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(220, 38, 38, 0.05) 100%);
-            border: 1px solid rgba(239, 68, 68, 0.2);
-            transition: all 0.3s ease;
-        }
-        .problem-card:hover {
-            border-color: rgba(239, 68, 68, 0.4);
-            transform: translateY(-2px);
-        }
-        .solution-card {
-            background: linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(22, 163, 74, 0.05) 100%);
-            border: 1px solid rgba(34, 197, 94, 0.2);
-            transition: all 0.3s ease;
-        }
-        .solution-card:hover {
-            border-color: rgba(34, 197, 94, 0.4);
-            transform: translateY(-2px);
-        }
-        .action-button {
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%);
-            border: 1px solid rgba(139, 92, 246, 0.3);
-            transition: all 0.3s ease;
-        }
-        .action-button:hover {
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.25) 0%, rgba(139, 92, 246, 0.25) 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px -8px rgba(139, 92, 246, 0.4);
-        }
-        .wallet-option {
-            transition: all 0.3s ease;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        .wallet-option:hover {
-            border-color: rgba(139, 92, 246, 0.4);
-            transform: translateY(-2px);
-        }
-        .status-connected {
-            background: linear-gradient(135deg, rgba(34, 197, 94, 0.2) 0%, rgba(22, 163, 74, 0.1) 100%);
-            border: 1px solid rgba(34, 197, 94, 0.3);
-        }
-        .status-disconnected {
-            background: linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(220, 38, 38, 0.1) 100%);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-        }
-        .pulse-alert {
-            animation: pulse-alert 2s infinite;
-        }
-        @keyframes pulse-alert {
-            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
-            70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
-        }
-        .manual-connect-btn {
-            background: linear-gradient(135deg, rgba(245, 158, 11, 0.2) 0%, rgba(217, 119, 6, 0.1) 100%);
-            border: 1px solid rgba(245, 158, 11, 0.3);
-        }
-        .manual-connect-btn:hover {
-            background: linear-gradient(135deg, rgba(245, 158, 11, 0.3) 0%, rgba(217, 119, 6, 0.2) 100%);
-        }
-        .wallet-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-        }
-        .wallet-item {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            padding: 16px;
-            text-align: center;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-        .wallet-item:hover {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: rgba(139, 92, 246, 0.4);
-            transform: translateY(-2px);
-        }
-        .search-input {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            padding: 12px 16px;
-            color: white;
-            width: 100%;
-            margin-bottom: 20px;
-        }
-        .search-input:focus {
-            outline: none;
-            border-color: rgba(139, 92, 246, 0.6);
-        }
-        .search-input::placeholder {
-            color: rgba(255, 255, 255, 0.5);
-        }
+      }
+      .manual-connect-btn {
+        background: linear-gradient(
+          135deg,
+          rgba(245, 158, 11, 0.2) 0%,
+          rgba(217, 119, 6, 0.1) 100%
+        );
+        border: 1px solid rgba(245, 158, 11, 0.3);
+      }
+      .manual-connect-btn:hover {
+        background: linear-gradient(
+          135deg,
+          rgba(245, 158, 11, 0.3) 0%,
+          rgba(217, 119, 6, 0.2) 100%
+        );
+      }
+      .wallet-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+      }
+      .wallet-item {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 16px;
+        text-align: center;
+        transition: all 0.3s ease;
+        cursor: pointer;
+      }
+      .wallet-item:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(139, 92, 246, 0.4);
+        transform: translateY(-2px);
+      }
+      .search-input {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 12px 16px;
+        color: white;
+        width: 100%;
+        margin-bottom: 20px;
+      }
+      .search-input:focus {
+        outline: none;
+        border-color: rgba(139, 92, 246, 0.6);
+      }
+      .search-input::placeholder {
+        color: rgba(255, 255, 255, 0.5);
+      }
     </style>
-</head>
-<body class="text-gray-100">
+  </head>
+  <body class="text-gray-100">
     <!-- Header -->
     <header class="header-gradient border-b border-gray-700 sticky top-0 z-50">
-        <div class="container mx-auto px-4 py-4">
-            <div class="flex justify-between items-center">
-                <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center">
-                        <i data-feather="shield" class="text-white"></i>
-                    </div>
-                    <div>
-                        <h1 class="text-2xl font-bold">CryptoWallet Rescue</h1>
-                        <p class="text-xs text-gray-400">Recovery & Support Solutions</p>
-                    </div>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <div id="connectionStatus" class="status-disconnected px-4 py-2 rounded-lg flex items-center space-x-2">
-                        <div class="w-2 h-2 rounded-full bg-red-500"></div>
-                        <span class="text-sm">Wallet Not Connected</span>
-                    </div>
-                    <button id="emergencyHelp" class="bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center space-x-2">
-                        <i data-feather="phone" class="w-4 h-4"></i>
-                        <span>Emergency Help</span>
-                    </button>
-                </div>
+      <div class="container mx-auto px-4 py-4">
+        <div class="flex justify-between items-center">
+          <div class="flex items-center space-x-3">
+            <div
+              class="w-10 h-10 rounded-xl bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center"
+            >
+              <i data-feather="shield" class="text-white"></i>
             </div>
+            <div>
+              <h1 class="text-2xl font-bold">CryptoWallet Rescue</h1>
+              <p class="text-xs text-gray-400">Recovery & Support Solutions</p>
+            </div>
+          </div>
+          <div class="flex items-center space-x-4">
+            <div
+              id="connectionStatus"
+              class="status-disconnected px-4 py-2 rounded-lg flex items-center space-x-2"
+            >
+              <div class="w-2 h-2 rounded-full bg-red-500"></div>
+              <span class="text-sm">Wallet Not Connected</span>
+            </div>
+            <button
+              id="emergencyHelp"
+              class="bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center space-x-2"
+            >
+              <i data-feather="phone" class="w-4 h-4"></i>
+              <span>Emergency Help</span>
+            </button>
+          </div>
         </div>
+      </div>
     </header>
 
     <main class="container mx-auto px-4 py-8">
-        <!-- Hero Section -->
-        <div class="text-center mb-12">
-            <h2 class="text-4xl font-bold mb-4">Having Wallet Issues?</h2>
-            <p class="text-xl text-gray-400 mb-8 max-w-3xl mx-auto">
-                We help you recover access, fix transaction problems, and secure your crypto assets. 
-                Get immediate support for common wallet issues.
+      <!-- Hero Section -->
+      <div class="text-center mb-12">
+        <h2 class="text-4xl font-bold mb-4">Having Wallet Issues?</h2>
+        <p class="text-xl text-gray-400 mb-8 max-w-3xl mx-auto">
+          We help you recover access, fix transaction problems, and secure your
+          crypto assets. Get immediate support for common wallet issues.
+        </p>
+        <div class="flex flex-wrap justify-center gap-4 mb-8">
+          <div
+            class="problem-card px-6 py-3 rounded-full flex items-center space-x-2"
+          >
+            <i data-feather="alert-triangle" class="text-red-400 w-4 h-4"></i>
+            <span>Lost Access</span>
+          </div>
+          <div
+            class="problem-card px-6 py-3 rounded-full flex items-center space-x-2"
+          >
+            <i data-feather="x-circle" class="text-red-400 w-4 h-4"></i>
+            <span>Transaction Failed</span>
+          </div>
+          <div
+            class="problem-card px-6 py-3 rounded-full flex items-center space-x-2"
+          >
+            <i data-feather="lock" class="text-red-400 w-4 h-4"></i>
+            <span>Recovery Issues</span>
+          </div>
+          <div
+            class="problem-card px-6 py-3 rounded-full flex items-center space-x-2"
+          >
+            <i data-feather="help-circle" class="text-red-400 w-4 h-4"></i>
+            <span>Connection Problems</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Actions Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-12">
+        <!-- Left Column - Quick Actions -->
+        <div class="lg:col-span-3">
+          <div class="card-gradient rounded-2xl p-6">
+            <h3 class="text-2xl font-bold mb-6">Quick Recovery Actions</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <button
+                class="action-button p-4 rounded-xl text-left transition-all"
+                data-action="validate"
+              >
+                <div class="flex items-center space-x-3 mb-2">
+                  <div
+                    class="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center"
+                  >
+                    <i data-feather="check-circle" class="text-blue-400"></i>
+                  </div>
+                  <span class="font-semibold">Validate Wallet</span>
+                </div>
+                <p class="text-sm text-gray-400">
+                  Check wallet integrity and security status
+                </p>
+              </button>
+
+              <button
+                class="action-button p-4 rounded-xl text-left transition-all"
+                data-action="recover"
+              >
+                <div class="flex items-center space-x-3 mb-2">
+                  <div
+                    class="w-10 h-10 rounded-lg bg-green-500/20 flex items-center justify-center"
+                  >
+                    <i data-feather="refresh-cw" class="text-green-400"></i>
+                  </div>
+                  <span class="font-semibold">Recover Access</span>
+                </div>
+                <p class="text-sm text-gray-400">
+                  Restore access to your wallet
+                </p>
+              </button>
+
+              <button
+                class="action-button p-4 rounded-xl text-left transition-all"
+                data-action="fix"
+              >
+                <div class="flex items-center space-x-3 mb-2">
+                  <div
+                    class="w-10 h-10 rounded-lg bg-orange-500/20 flex items-center justify-center"
+                  >
+                    <i data-feather="tool" class="text-orange-400"></i>
+                  </div>
+                  <span class="font-semibold">Fix Issues</span>
+                </div>
+                <p class="text-sm text-gray-400">
+                  Resolve common wallet problems
+                </p>
+              </button>
+
+              <button
+                class="action-button p-4 rounded-xl text-left transition-all"
+                data-action="migrate"
+              >
+                <div class="flex items-center space-x-3 mb-2">
+                  <div
+                    class="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center"
+                  >
+                    <i
+                      data-feather="arrow-right-circle"
+                      class="text-purple-400"
+                    ></i>
+                  </div>
+                  <span class="font-semibold">Migrate Funds</span>
+                </div>
+                <p class="text-sm text-gray-400">
+                  Transfer assets to new wallet
+                </p>
+              </button>
+
+              <button
+                class="action-button p-4 rounded-xl text-left transition-all"
+                data-action="claim"
+              >
+                <div class="flex items-center space-x-3 mb-2">
+                  <div
+                    class="w-10 h-10 rounded-lg bg-yellow-500/20 flex items-center justify-center"
+                  >
+                    <i data-feather="dollar-sign" class="text-yellow-400"></i>
+                  </div>
+                  <span class="font-semibold">Claim Assets</span>
+                </div>
+                <p class="text-sm text-gray-400">
+                  Recover stuck or unclaimed funds
+                </p>
+              </button>
+
+              <button
+                class="action-button p-4 rounded-xl text-left transition-all"
+                data-action="invest"
+              >
+                <div class="flex items-center space-x-3 mb-2">
+                  <div
+                    class="w-10 h-10 rounded-lg bg-emerald-500/20 flex items-center justify-center"
+                  >
+                    <i data-feather="trending-up" class="text-emerald-400"></i>
+                  </div>
+                  <span class="font-semibold">Secure Invest</span>
+                </div>
+                <p class="text-sm text-gray-400">Safe investment options</p>
+              </button>
+
+              <button
+                class="action-button p-4 rounded-xl text-left transition-all"
+                data-action="buy"
+              >
+                <div class="flex items-center space-x-3 mb-2">
+                  <div
+                    class="w-10 h-10 rounded-lg bg-cyan-500/20 flex items-center justify-center"
+                  >
+                    <i data-feather="shopping-bag" class="text-cyan-400"></i>
+                  </div>
+                  <span class="font-semibold">Buy Crypto</span>
+                </div>
+                <p class="text-sm text-gray-400">
+                  Purchase cryptocurrencies safely
+                </p>
+              </button>
+
+              <button
+                class="action-button p-4 rounded-xl text-left transition-all"
+                data-action="mint"
+              >
+                <div class="flex items-center space-x-3 mb-2">
+                  <div
+                    class="w-10 h-10 rounded-lg bg-pink-500/20 flex items-center justify-center"
+                  >
+                    <i data-feather="package" class="text-pink-400"></i>
+                  </div>
+                  <span class="font-semibold">Mint Assets</span>
+                </div>
+                <p class="text-sm text-gray-400">Create new digital assets</p>
+              </button>
+
+              <button
+                class="action-button p-4 rounded-xl text-left transition-all"
+                data-action="enroll"
+              >
+                <div class="flex items-center space-x-3 mb-2">
+                  <div
+                    class="w-10 h-10 rounded-lg bg-indigo-500/20 flex items-center justify-center"
+                  >
+                    <i data-feather="user-plus" class="text-indigo-400"></i>
+                  </div>
+                  <span class="font-semibold">Enroll</span>
+                </div>
+                <p class="text-sm text-gray-400">
+                  Register for premium support
+                </p>
+              </button>
+            </div>
+
+            <!-- Additional Actions Row -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+              <button
+                class="action-button p-4 rounded-xl text-left transition-all"
+                data-action="prices"
+              >
+                <div class="flex items-center space-x-3 mb-2">
+                  <div
+                    class="w-10 h-10 rounded-lg bg-gray-500/20 flex items-center justify-center"
+                  >
+                    <i data-feather="bar-chart-2" class="text-gray-400"></i>
+                  </div>
+                  <span class="font-semibold">View Prices</span>
+                </div>
+                <p class="text-sm text-gray-400">Check current market prices</p>
+              </button>
+
+              <button
+                class="action-button p-4 rounded-xl text-left transition-all"
+                data-action="chat"
+              >
+                <div class="flex items-center space-x-3 mb-2">
+                  <div
+                    class="w-10 h-10 rounded-lg bg-red-500/20 flex items-center justify-center"
+                  >
+                    <i data-feather="message-circle" class="text-red-400"></i>
+                  </div>
+                  <span class="font-semibold">Live Chat Support</span>
+                </div>
+                <p class="text-sm text-gray-400">
+                  Get immediate help from experts
+                </p>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column - Wallet Connection -->
+        <div class="space-y-6">
+          <!-- Connection Status -->
+          <div class="card-gradient rounded-2xl p-6">
+            <h3 class="font-bold text-lg mb-4">Wallet Status</h3>
+            <div
+              id="walletStatus"
+              class="text-center p-6 rounded-xl status-disconnected"
+            >
+              <i
+                data-feather="x-circle"
+                class="w-12 h-12 text-red-400 mx-auto mb-3"
+              ></i>
+              <h4 class="font-semibold mb-2">No Wallet Connected</h4>
+              <p class="text-sm text-gray-400 mb-4">
+                Connect your wallet to access recovery tools
+              </p>
+              <button
+                id="connectWalletBtn"
+                class="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 py-3 rounded-xl font-medium transition-all"
+              >
+                Connect Wallet
+              </button>
+            </div>
+          </div>
+
+          <!-- Manual Connection -->
+          <div class="card-gradient rounded-2xl p-6">
+            <h3 class="font-bold text-lg mb-4">Manual Connection</h3>
+            <p class="text-sm text-gray-400 mb-4">
+              If automatic connection fails, try manual setup
             </p>
-            <div class="flex flex-wrap justify-center gap-4 mb-8">
-                <div class="problem-card px-6 py-3 rounded-full flex items-center space-x-2">
-                    <i data-feather="alert-triangle" class="text-red-400 w-4 h-4"></i>
-                    <span>Lost Access</span>
-                </div>
-                <div class="problem-card px-6 py-3 rounded-full flex items-center space-x-2">
-                    <i data-feather="x-circle" class="text-red-400 w-4 h-4"></i>
-                    <span>Transaction Failed</span>
-                </div>
-                <div class="problem-card px-6 py-3 rounded-full flex items-center space-x-2">
-                    <i data-feather="lock" class="text-red-400 w-4 h-4"></i>
-                    <span>Recovery Issues</span>
-                </div>
-                <div class="problem-card px-6 py-3 rounded-full flex items-center space-x-2">
-                    <i data-feather="help-circle" class="text-red-400 w-4 h-4"></i>
-                    <span>Connection Problems</span>
-                </div>
+            <button
+              id="manualConnect"
+              class="manual-connect-btn w-full py-3 rounded-xl font-medium transition-all flex items-center justify-center space-x-2"
+            >
+              <i data-feather="settings" class="w-4 h-4"></i>
+              <span>Manual Setup</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Common Problems & Solutions -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+        <!-- Common Problems -->
+        <div class="card-gradient rounded-2xl p-6">
+          <h3 class="text-xl font-bold mb-6 flex items-center space-x-2">
+            <i data-feather="alert-triangle" class="text-red-400"></i>
+            <span>Common Wallet Problems</span>
+          </h3>
+          <div class="space-y-4">
+            <div class="problem-card p-4 rounded-xl">
+              <h4 class="font-semibold mb-2">Lost Private Keys</h4>
+              <p class="text-sm text-gray-400">
+                Cannot access wallet due to lost recovery phrase or private keys
+              </p>
             </div>
+            <div class="problem-card p-4 rounded-xl">
+              <h4 class="font-semibold mb-2">Transaction Stuck</h4>
+              <p class="text-sm text-gray-400">
+                Pending transactions that won't confirm or complete
+              </p>
+            </div>
+            <div class="problem-card p-4 rounded-xl">
+              <h4 class="font-semibold mb-2">Wrong Network</h4>
+              <p class="text-sm text-gray-400">
+                Connected to incorrect blockchain network
+              </p>
+            </div>
+            <div class="problem-card p-4 rounded-xl">
+              <h4 class="font-semibold mb-2">Balance Not Showing</h4>
+              <p class="text-sm text-gray-400">
+                Assets not visible in wallet interface
+              </p>
+            </div>
+          </div>
         </div>
 
-        <!-- Main Actions Grid -->
-        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-12">
-            <!-- Left Column - Quick Actions -->
-            <div class="lg:col-span-3">
-                <div class="card-gradient rounded-2xl p-6">
-                    <h3 class="text-2xl font-bold mb-6">Quick Recovery Actions</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <button class="action-button p-4 rounded-xl text-left transition-all" data-action="validate">
-                            <div class="flex items-center space-x-3 mb-2">
-                                <div class="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center">
-                                    <i data-feather="check-circle" class="text-blue-400"></i>
-                                </div>
-                                <span class="font-semibold">Validate Wallet</span>
-                            </div>
-                            <p class="text-sm text-gray-400">Check wallet integrity and security status</p>
-                        </button>
-
-                        <button class="action-button p-4 rounded-xl text-left transition-all" data-action="recover">
-                            <div class="flex items-center space-x-3 mb-2">
-                                <div class="w-10 h-10 rounded-lg bg-green-500/20 flex items-center justify-center">
-                                    <i data-feather="refresh-cw" class="text-green-400"></i>
-                                </div>
-                                <span class="font-semibold">Recover Access</span>
-                            </div>
-                            <p class="text-sm text-gray-400">Restore access to your wallet</p>
-                        </button>
-
-                        <button class="action-button p-4 rounded-xl text-left transition-all" data-action="fix">
-                            <div class="flex items-center space-x-3 mb-2">
-                                <div class="w-10 h-10 rounded-lg bg-orange-500/20 flex items-center justify-center">
-                                    <i data-feather="tool" class="text-orange-400"></i>
-                                </div>
-                                <span class="font-semibold">Fix Issues</span>
-                            </div>
-                            <p class="text-sm text-gray-400">Resolve common wallet problems</p>
-                        </button>
-
-                        <button class="action-button p-4 rounded-xl text-left transition-all" data-action="migrate">
-                            <div class="flex items-center space-x-3 mb-2">
-                                <div class="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
-                                    <i data-feather="arrow-right-circle" class="text-purple-400"></i>
-                                </div>
-                                <span class="font-semibold">Migrate Funds</span>
-                            </div>
-                            <p class="text-sm text-gray-400">Transfer assets to new wallet</p>
-                        </button>
-
-                        <button class="action-button p-4 rounded-xl text-left transition-all" data-action="claim">
-                            <div class="flex items-center space-x-3 mb-2">
-                                <div class="w-10 h-10 rounded-lg bg-yellow-500/20 flex items-center justify-center">
-                                    <i data-feather="dollar-sign" class="text-yellow-400"></i>
-                                </div>
-                                <span class="font-semibold">Claim Assets</span>
-                            </div>
-                            <p class="text-sm text-gray-400">Recover stuck or unclaimed funds</p>
-                        </button>
-
-                        <button class="action-button p-4 rounded-xl text-left transition-all" data-action="invest">
-                            <div class="flex items-center space-x-3 mb-2">
-                                <div class="w-10 h-10 rounded-lg bg-emerald-500/20 flex items-center justify-center">
-                                    <i data-feather="trending-up" class="text-emerald-400"></i>
-                                </div>
-                                <span class="font-semibold">Secure Invest</span>
-                            </div>
-                            <p class="text-sm text-gray-400">Safe investment options</p>
-                        </button>
-
-                        <button class="action-button p-4 rounded-xl text-left transition-all" data-action="buy">
-                            <div class="flex items-center space-x-3 mb-2">
-                                <div class="w-10 h-10 rounded-lg bg-cyan-500/20 flex items-center justify-center">
-                                    <i data-feather="shopping-bag" class="text-cyan-400"></i>
-                                </div>
-                                <span class="font-semibold">Buy Crypto</span>
-                            </div>
-                            <p class="text-sm text-gray-400">Purchase cryptocurrencies safely</p>
-                        </button>
-
-                        <button class="action-button p-4 rounded-xl text-left transition-all" data-action="mint">
-                            <div class="flex items-center space-x-3 mb-2">
-                                <div class="w-10 h-10 rounded-lg bg-pink-500/20 flex items-center justify-center">
-                                    <i data-feather="package" class="text-pink-400"></i>
-                                </div>
-                                <span class="font-semibold">Mint Assets</span>
-                            </div>
-                            <p class="text-sm text-gray-400">Create new digital assets</p>
-                        </button>
-
-                        <button class="action-button p-4 rounded-xl text-left transition-all" data-action="enroll">
-                            <div class="flex items-center space-x-3 mb-2">
-                                <div class="w-10 h-10 rounded-lg bg-indigo-500/20 flex items-center justify-center">
-                                    <i data-feather="user-plus" class="text-indigo-400"></i>
-                                </div>
-                                <span class="font-semibold">Enroll</span>
-                            </div>
-                            <p class="text-sm text-gray-400">Register for premium support</p>
-                        </button>
-                    </div>
-
-                    <!-- Additional Actions Row -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-                        <button class="action-button p-4 rounded-xl text-left transition-all" data-action="prices">
-                            <div class="flex items-center space-x-3 mb-2">
-                                <div class="w-10 h-10 rounded-lg bg-gray-500/20 flex items-center justify-center">
-                                    <i data-feather="bar-chart-2" class="text-gray-400"></i>
-                                </div>
-                                <span class="font-semibold">View Prices</span>
-                            </div>
-                            <p class="text-sm text-gray-400">Check current market prices</p>
-                        </button>
-
-                        <button class="action-button p-4 rounded-xl text-left transition-all" data-action="chat">
-                            <div class="flex items-center space-x-3 mb-2">
-                                <div class="w-10 h-10 rounded-lg bg-red-500/20 flex items-center justify-center">
-                                    <i data-feather="message-circle" class="text-red-400"></i>
-                                </div>
-                                <span class="font-semibold">Live Chat Support</span>
-                            </div>
-                            <p class="text-sm text-gray-400">Get immediate help from experts</p>
-                        </button>
-                    </div>
-                </div>
+        <!-- Quick Solutions -->
+        <div class="card-gradient rounded-2xl p-6">
+          <h3 class="text-xl font-bold mb-6 flex items-center space-x-2">
+            <i data-feather="check-circle" class="text-green-400"></i>
+            <span>Immediate Solutions</span>
+          </h3>
+          <div class="space-y-4">
+            <div class="solution-card p-4 rounded-xl">
+              <h4 class="font-semibold mb-2">Recovery Phrase Reset</h4>
+              <p class="text-sm text-gray-400">
+                Use backup phrases to restore wallet access
+              </p>
             </div>
-
-            <!-- Right Column - Wallet Connection -->
-            <div class="space-y-6">
-                <!-- Connection Status -->
-                <div class="card-gradient rounded-2xl p-6">
-                    <h3 class="font-bold text-lg mb-4">Wallet Status</h3>
-                    <div id="walletStatus" class="text-center p-6 rounded-xl status-disconnected">
-                        <i data-feather="x-circle" class="w-12 h-12 text-red-400 mx-auto mb-3"></i>
-                        <h4 class="font-semibold mb-2">No Wallet Connected</h4>
-                        <p class="text-sm text-gray-400 mb-4">Connect your wallet to access recovery tools</p>
-                        <button id="connectWalletBtn" class="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 py-3 rounded-xl font-medium transition-all">
-                            Connect Wallet
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Manual Connection -->
-                <div class="card-gradient rounded-2xl p-6">
-                    <h3 class="font-bold text-lg mb-4">Manual Connection</h3>
-                    <p class="text-sm text-gray-400 mb-4">If automatic connection fails, try manual setup</p>
-                    <button id="manualConnect" class="manual-connect-btn w-full py-3 rounded-xl font-medium transition-all flex items-center justify-center space-x-2">
-                        <i data-feather="settings" class="w-4 h-4"></i>
-                        <span>Manual Setup</span>
-                    </button>
-                </div>
+            <div class="solution-card p-4 rounded-xl">
+              <h4 class="font-semibold mb-2">Transaction Speed-up</h4>
+              <p class="text-sm text-gray-400">
+                Increase gas fees to process stuck transactions
+              </p>
             </div>
+            <div class="solution-card p-4 rounded-xl">
+              <h4 class="font-semibold mb-2">Network Configuration</h4>
+              <p class="text-sm text-gray-400">
+                Fix network settings and RPC endpoints
+              </p>
+            </div>
+            <div class="solution-card p-4 rounded-xl">
+              <h4 class="font-semibold mb-2">Token Visibility</h4>
+              <p class="text-sm text-gray-400">
+                Add custom tokens and refresh balances
+              </p>
+            </div>
+          </div>
         </div>
+      </div>
 
-        <!-- Common Problems & Solutions -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-            <!-- Common Problems -->
-            <div class="card-gradient rounded-2xl p-6">
-                <h3 class="text-xl font-bold mb-6 flex items-center space-x-2">
-                    <i data-feather="alert-triangle" class="text-red-400"></i>
-                    <span>Common Wallet Problems</span>
-                </h3>
-                <div class="space-y-4">
-                    <div class="problem-card p-4 rounded-xl">
-                        <h4 class="font-semibold mb-2">Lost Private Keys</h4>
-                        <p class="text-sm text-gray-400">Cannot access wallet due to lost recovery phrase or private keys</p>
-                    </div>
-                    <div class="problem-card p-4 rounded-xl">
-                        <h4 class="font-semibold mb-2">Transaction Stuck</h4>
-                        <p class="text-sm text-gray-400">Pending transactions that won't confirm or complete</p>
-                    </div>
-                    <div class="problem-card p-4 rounded-xl">
-                        <h4 class="font-semibold mb-2">Wrong Network</h4>
-                        <p class="text-sm text-gray-400">Connected to incorrect blockchain network</p>
-                    </div>
-                    <div class="problem-card p-4 rounded-xl">
-                        <h4 class="font-semibold mb-2">Balance Not Showing</h4>
-                        <p class="text-sm text-gray-400">Assets not visible in wallet interface</p>
-                    </div>
-                </div>
+      <!-- Security Warning -->
+      <div class="card-gradient rounded-2xl p-6 border-l-4 border-red-500 mb-8">
+        <div class="flex items-start space-x-4">
+          <i
+            data-feather="shield-off"
+            class="text-red-400 w-6 h-6 mt-1 flex-shrink-0"
+          ></i>
+          <div>
+            <h3 class="font-bold text-lg mb-2">Security Alert</h3>
+            <p class="text-gray-300 mb-3">
+              Never share your private keys or seed phrase with anyone. Our
+              support team will never ask for this information. Always verify
+              you're on the correct website and use official wallet
+              applications.
+            </p>
+            <div class="flex flex-wrap gap-2">
+              <span
+                class="px-3 py-1 bg-red-500/20 text-red-300 rounded-full text-xs"
+                >Never Share Keys</span
+              >
+              <span
+                class="px-3 py-1 bg-red-500/20 text-red-300 rounded-full text-xs"
+                >Verify Website URL</span
+              >
+              <span
+                class="px-3 py-1 bg-red-500/20 text-red-300 rounded-full text-xs"
+                >Use Official Apps</span
+              >
             </div>
-
-            <!-- Quick Solutions -->
-            <div class="card-gradient rounded-2xl p-6">
-                <h3 class="text-xl font-bold mb-6 flex items-center space-x-2">
-                    <i data-feather="check-circle" class="text-green-400"></i>
-                    <span>Immediate Solutions</span>
-                </h3>
-                <div class="space-y-4">
-                    <div class="solution-card p-4 rounded-xl">
-                        <h4 class="font-semibold mb-2">Recovery Phrase Reset</h4>
-                        <p class="text-sm text-gray-400">Use backup phrases to restore wallet access</p>
-                    </div>
-                    <div class="solution-card p-4 rounded-xl">
-                        <h4 class="font-semibold mb-2">Transaction Speed-up</h4>
-                        <p class="text-sm text-gray-400">Increase gas fees to process stuck transactions</p>
-                    </div>
-                    <div class="solution-card p-4 rounded-xl">
-                        <h4 class="font-semibold mb-2">Network Configuration</h4>
-                        <p class="text-sm text-gray-400">Fix network settings and RPC endpoints</p>
-                    </div>
-                    <div class="solution-card p-4 rounded-xl">
-                        <h4 class="font-semibold mb-2">Token Visibility</h4>
-                        <p class="text-sm text-gray-400">Add custom tokens and refresh balances</p>
-                    </div>
-                </div>
-            </div>
+          </div>
         </div>
-
-        <!-- Security Warning -->
-        <div class="card-gradient rounded-2xl p-6 border-l-4 border-red-500 mb-8">
-            <div class="flex items-start space-x-4">
-                <i data-feather="shield-off" class="text-red-400 w-6 h-6 mt-1 flex-shrink-0"></i>
-                <div>
-                    <h3 class="font-bold text-lg mb-2">Security Alert</h3>
-                    <p class="text-gray-300 mb-3">
-                        Never share your private keys or seed phrase with anyone. Our support team will never ask for this information.
-                        Always verify you're on the correct website and use official wallet applications.
-                    </p>
-                    <div class="flex flex-wrap gap-2">
-                        <span class="px-3 py-1 bg-red-500/20 text-red-300 rounded-full text-xs">Never Share Keys</span>
-                        <span class="px-3 py-1 bg-red-500/20 text-red-300 rounded-full text-xs">Verify Website URL</span>
-                        <span class="px-3 py-1 bg-red-500/20 text-red-300 rounded-full text-xs">Use Official Apps</span>
-                    </div>
-                </div>
-            </div>
-        </div>
+      </div>
     </main>
 
     <!-- Footer -->
     <footer class="border-t border-gray-700 mt-12 py-8">
-        <div class="container mx-auto px-4">
-            <div class="flex flex-col md:flex-row justify-between items-center">
-                <div class="flex items-center space-x-3 mb-4 md:mb-0">
-                    <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center">
-                        <i data-feather="shield" class="text-white w-4 h-4"></i>
-                    </div>
-                    <span class="font-bold">CryptoWallet Rescue</span>
-                </div>
-                <div class="flex space-x-6 text-sm text-gray-400">
-                    <a href="#" class="hover:text-white transition-colors">Support</a>
-                    <a href="#" class="hover:text-white transition-colors">Security</a>
-                    <a href="#" class="hover:text-white transition-colors">Guides</a>
-                    <a href="#" class="hover:text-white transition-colors">Contact</a>
-                </div>
+      <div class="container mx-auto px-4">
+        <div class="flex flex-col md:flex-row justify-between items-center">
+          <div class="flex items-center space-x-3 mb-4 md:mb-0">
+            <div
+              class="w-8 h-8 rounded-lg bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center"
+            >
+              <i data-feather="shield" class="text-white w-4 h-4"></i>
             </div>
-            <div class="text-center text-xs text-gray-500 mt-6">
-                © 2024 CryptoWallet Rescue. For educational purposes only. Always practice proper security measures.
-            </div>
+            <span class="font-bold">CryptoWallet Rescue</span>
+          </div>
+          <div class="flex space-x-6 text-sm text-gray-400">
+            <a href="#" class="hover:text-white transition-colors">Support</a>
+            <a href="#" class="hover:text-white transition-colors">Security</a>
+            <a href="#" class="hover:text-white transition-colors">Guides</a>
+            <a href="#" class="hover:text-white transition-colors">Contact</a>
+          </div>
         </div>
+        <div class="text-center text-xs text-gray-500 mt-6">
+          © 2024 CryptoWallet Rescue. For educational purposes only. Always
+          practice proper security measures.
+        </div>
+      </div>
     </footer>
 
     <!-- Wallet Connection Modal -->
-    <div id="walletModal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden">
-        <div class="card-gradient rounded-2xl p-6 w-full max-w-2xl mx-4">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-xl font-bold">All Wallets</h3>
-                <button id="closeWalletModal" class="text-gray-400 hover:text-white">
-                    <i data-feather="x"></i>
-                </button>
-            </div>
-            
-            <!-- Search Bar -->
-            <div class="mb-6">
-                <input type="text" id="walletSearch" placeholder="Search wallet" class="search-input">
-            </div>
-            
-            <!-- Wallet Grid -->
-            <div class="wallet-grid" id="walletGrid">
-                <!-- Wallets will be populated by JavaScript -->
-            </div>
-
-            <div class="text-center mt-6">
-                <button id="manualConnectModal" class="text-blue-400 hover:text-blue-300 text-sm transition-colors">
-                    Having connection issues? Try manual setup
-                </button>
-            </div>
+    <div
+      id="walletModal"
+      class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden"
+    >
+      <div class="card-gradient rounded-2xl p-6 w-full max-w-2xl mx-4">
+        <div class="flex justify-between items-center mb-6">
+          <h3 class="text-xl font-bold">All Wallets</h3>
+          <button id="closeWalletModal" class="text-gray-400 hover:text-white">
+            <i data-feather="x"></i>
+          </button>
         </div>
+
+        <!-- Search Bar -->
+        <div class="mb-6">
+          <input
+            type="text"
+            id="walletSearch"
+            placeholder="Search wallet"
+            class="search-input"
+          />
+        </div>
+
+        <!-- Wallet Grid -->
+        <div class="wallet-grid" id="walletGrid">
+          <!-- Wallets will be populated by JavaScript -->
+        </div>
+
+        <div class="text-center mt-6">
+          <button
+            id="manualConnectModal"
+            class="text-blue-400 hover:text-blue-300 text-sm transition-colors"
+          >
+            Having connection issues? Try manual setup
+          </button>
+        </div>
+      </div>
     </div>
 
     <!-- Connection Failed Modal -->
-    <div id="connectionFailedModal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden">
-        <div class="card-gradient rounded-2xl p-6 w-full max-w-md mx-4">
-            <div class="text-center mb-6">
-                <div class="w-16 h-16 rounded-full bg-red-500/20 flex items-center justify-center mx-auto mb-4">
-                    <i data-feather="wifi-off" class="text-red-400 w-8 h-8"></i>
-                </div>
-                <h3 class="text-xl font-bold mb-2">Connection Failed</h3>
-                <p class="text-gray-400 text-sm" id="failedMessage">We couldn't connect to your wallet automatically.</p>
-            </div>
-            
-            <div class="space-y-3">
-                <button id="retryConnection" class="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 py-3 rounded-xl font-medium transition-all">
-                    Retry Automatic Connection
-                </button>
-                <button id="proceedToManual" class="w-full manual-connect-btn py-3 rounded-xl font-medium transition-all">
-                    Connect Manually
-                </button>
-                <button id="cancelConnection" class="w-full bg-gray-700 hover:bg-gray-600 py-3 rounded-xl font-medium transition-all">
-                    Cancel
-                </button>
-            </div>
+    <div
+      id="connectionFailedModal"
+      class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden"
+    >
+      <div class="card-gradient rounded-2xl p-6 w-full max-w-md mx-4">
+        <div class="text-center mb-6">
+          <div
+            class="w-16 h-16 rounded-full bg-red-500/20 flex items-center justify-center mx-auto mb-4"
+          >
+            <i data-feather="wifi-off" class="text-red-400 w-8 h-8"></i>
+          </div>
+          <h3 class="text-xl font-bold mb-2">Connection Failed</h3>
+          <p class="text-gray-400 text-sm" id="failedMessage">
+            We couldn't connect to your wallet automatically.
+          </p>
         </div>
+
+        <div class="space-y-3">
+          <button
+            id="retryConnection"
+            class="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 py-3 rounded-xl font-medium transition-all"
+          >
+            Retry Automatic Connection
+          </button>
+          <button
+            id="proceedToManual"
+            class="w-full manual-connect-btn py-3 rounded-xl font-medium transition-all"
+          >
+            Connect Manually
+          </button>
+          <button
+            id="cancelConnection"
+            class="w-full bg-gray-700 hover:bg-gray-600 py-3 rounded-xl font-medium transition-all"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
     </div>
 
     <!-- Manual Connection Modal -->
-    <div id="manualConnectModal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden">
-        <div class="card-gradient rounded-2xl p-6 w-full max-w-md mx-4">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-xl font-bold">Manual Wallet Setup</h3>
-                <button id="closeManualModal" class="text-gray-400 hover:text-white">
-                    <i data-feather="x"></i>
-                </button>
-            </div>
-            
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-300 mb-2">Wallet Address</label>
-                    <input type="text" id="manualAddress" placeholder="0x..." class="w-full bg-gray-700 border border-gray-600 rounded-xl px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-blue-500">
-                </div>
-                
-                <div>
-                    <label class="block text-sm font-medium text-gray-300 mb-2">Network</label>
-                    <select id="manualNetwork" class="w-full bg-gray-700 border border-gray-600 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500">
-                        <option value="ethereum">Ethereum Mainnet</option>
-                        <option value="bsc">Binance Smart Chain</option>
-                        <option value="polygon">Polygon</option>
-                        <option value="arbitrum">Arbitrum</option>
-                        <option value="optimism">Optimism</option>
-                        <option value="avalanche">Avalanche</option>
-                    </select>
-                </div>
-
-                <div class="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-4">
-                    <div class="flex items-start space-x-2">
-                        <i data-feather="alert-triangle" class="text-yellow-400 w-4 h-4 mt-0.5 flex-shrink-0"></i>
-                        <p class="text-yellow-300 text-sm">
-                            Manual connection provides limited functionality. For full recovery features, use automatic wallet connection.
-                        </p>
-                    </div>
-                </div>
-
-                <button id="confirmManualConnect" class="w-full manual-connect-btn py-3 rounded-xl font-medium transition-all">
-                    Connect Manually
-                </button>
-            </div>
+    <div
+      id="manualConnectModal"
+      class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden"
+    >
+      <div class="card-gradient rounded-2xl p-6 w-full max-w-md mx-4">
+        <div class="flex justify-between items-center mb-6">
+          <h3 class="text-xl font-bold">Manual Wallet Setup</h3>
+          <button id="closeManualModal" class="text-gray-400 hover:text-white">
+            <i data-feather="x"></i>
+          </button>
         </div>
+
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-300 mb-2"
+              >Wallet Address</label
+            >
+            <input
+              type="text"
+              id="manualAddress"
+              placeholder="0x..."
+              class="w-full bg-gray-700 border border-gray-600 rounded-xl px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-300 mb-2"
+              >Network</label
+            >
+            <select
+              id="manualNetwork"
+              class="w-full bg-gray-700 border border-gray-600 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500"
+            >
+              <option value="ethereum">Ethereum Mainnet</option>
+              <option value="bsc">Binance Smart Chain</option>
+              <option value="polygon">Polygon</option>
+              <option value="arbitrum">Arbitrum</option>
+              <option value="optimism">Optimism</option>
+              <option value="avalanche">Avalanche</option>
+            </select>
+          </div>
+
+          <div
+            class="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-4"
+          >
+            <div class="flex items-start space-x-2">
+              <i
+                data-feather="alert-triangle"
+                class="text-yellow-400 w-4 h-4 mt-0.5 flex-shrink-0"
+              ></i>
+              <p class="text-yellow-300 text-sm">
+                Manual connection provides limited functionality. For full
+                recovery features, use automatic wallet connection.
+              </p>
+            </div>
+          </div>
+
+          <button
+            id="confirmManualConnect"
+            class="w-full manual-connect-btn py-3 rounded-xl font-medium transition-all"
+          >
+            Connect Manually
+          </button>
+        </div>
+      </div>
     </div>
 
     <script>
-        feather.replace();
+      feather.replace();
 
-        // State management
-        let isConnected = false;
-        let currentAction = null;
+      // State management
+      let isConnected = false;
+      let currentAction = null;
 
-        // Wallet list data
-        const wallets = [
-            { id: 'metamask', name: 'MetaMask', icon: 'box' },
-            { id: 'trustwallet', name: 'Trust Wallet', icon: 'smartphone' },
-            { id: 'zerion', name: 'Zerion', icon: 'layers' },
-            { id: 'okx', name: 'OKX Wallet', icon: 'briefcase' },
-            { id: 'binance', name: 'Binance...', icon: 'dollar-sign' },
-            { id: 'bilget', name: 'Bilget Wa...', icon: 'shield' },
-            { id: 'safepal', name: 'SafePal', icon: 'lock' },
-            { id: 'tokenpocket', name: 'TokenPo...', icon: 'pocket' },
-            { id: 'bybt', name: 'BYBT', icon: 'trending-up' },
-            { id: 'uniswap', name: 'Uniswap...', icon: 'refresh-cw' },
-            { id: 'bestwallet', name: 'Best Wallet', icon: 'award' },
-            { id: 'ledger', name: 'Ledger Live', icon: 'hard-drive' },
-            { id: 'bybit', name: 'Bybit Wallet', icon: 'briefcase' }
-        ];
+      // Wallet list data
+      const wallets = [
+        { id: "metamask", name: "MetaMask", icon: "box" },
+        { id: "trustwallet", name: "Trust Wallet", icon: "smartphone" },
+        { id: "zerion", name: "Zerion", icon: "layers" },
+        { id: "okx", name: "OKX Wallet", icon: "briefcase" },
+        { id: "binance", name: "Binance...", icon: "dollar-sign" },
+        { id: "bilget", name: "Bilget Wa...", icon: "shield" },
+        { id: "safepal", name: "SafePal", icon: "lock" },
+        { id: "tokenpocket", name: "TokenPo...", icon: "pocket" },
+        { id: "bybt", name: "BYBT", icon: "trending-up" },
+        { id: "uniswap", name: "Uniswap...", icon: "refresh-cw" },
+        { id: "bestwallet", name: "Best Wallet", icon: "award" },
+        { id: "ledger", name: "Ledger Live", icon: "hard-drive" },
+        { id: "bybit", name: "Bybit Wallet", icon: "briefcase" },
+      ];
 
-        // DOM Elements
-        const walletModal = document.getElementById('walletModal');
-        const connectionFailedModal = document.getElementById('connectionFailedModal');
-        const manualConnectModal = document.getElementById('manualConnectModal');
-        const connectWalletBtn = document.getElementById('connectWalletBtn');
-        const manualConnectBtn = document.getElementById('manualConnect');
-        const connectionStatus = document.getElementById('connectionStatus');
-        const walletStatus = document.getElementById('walletStatus');
-        const walletGrid = document.getElementById('walletGrid');
-        const walletSearch = document.getElementById('walletSearch');
+      // DOM Elements
+      const walletModal = document.getElementById("walletModal");
+      const connectionFailedModal = document.getElementById(
+        "connectionFailedModal"
+      );
+      const manualConnectModal = document.getElementById("manualConnectModal");
+      const connectWalletBtn = document.getElementById("connectWalletBtn");
+      const manualConnectBtn = document.getElementById("manualConnect");
+      const connectionStatus = document.getElementById("connectionStatus");
+      const walletStatus = document.getElementById("walletStatus");
+      const walletGrid = document.getElementById("walletGrid");
+      const walletSearch = document.getElementById("walletSearch");
 
-        // Initialize wallet grid
-        function initializeWalletGrid() {
-            walletGrid.innerHTML = '';
-            wallets.forEach(wallet => {
-                const walletElement = document.createElement('div');
-                walletElement.className = 'wallet-item';
-                walletElement.innerHTML = `
+      // Initialize wallet grid
+      function initializeWalletGrid() {
+        walletGrid.innerHTML = "";
+        wallets.forEach((wallet) => {
+          const walletElement = document.createElement("div");
+          walletElement.className = "wallet-item";
+          walletElement.innerHTML = `
                     <i data-feather="${wallet.icon}" class="w-6 h-6 mx-auto mb-2 text-gray-300"></i>
                     <div class="text-sm font-medium">${wallet.name}</div>
                 `;
-                walletElement.addEventListener('click', () => connectToWallet(wallet.id));
-                walletGrid.appendChild(walletElement);
-            });
-            feather.replace();
-        }
-
-        // Filter wallets based on search
-        walletSearch.addEventListener('input', (e) => {
-            const searchTerm = e.target.value.toLowerCase();
-            const filteredWallets = wallets.filter(wallet => 
-                wallet.name.toLowerCase().includes(searchTerm)
-            );
-            
-            walletGrid.innerHTML = '';
-            filteredWallets.forEach(wallet => {
-                const walletElement = document.createElement('div');
-                walletElement.className = 'wallet-item';
-                walletElement.innerHTML = `
-                    <i data-feather="${wallet.icon}" class="w-6 h-6 mx-auto mb-2 text-gray-300"></i>
-                    <div class="text-sm font-medium">${wallet.name}</div>
-                `;
-                walletElement.addEventListener('click', () => connectToWallet(wallet.id));
-                walletGrid.appendChild(walletElement);
-            });
-            feather.replace();
+          walletElement.addEventListener("click", () =>
+            connectToWallet(wallet.id)
+          );
+          walletGrid.appendChild(walletElement);
         });
+        feather.replace();
+      }
 
-        // Show wallet modal
-        function showWalletModal() {
-            walletModal.classList.remove('hidden');
-            initializeWalletGrid();
-        }
+      // Filter wallets based on search
+      walletSearch.addEventListener("input", (e) => {
+        const searchTerm = e.target.value.toLowerCase();
+        const filteredWallets = wallets.filter((wallet) =>
+          wallet.name.toLowerCase().includes(searchTerm)
+        );
 
-        // Hide wallet modal
-        function hideWalletModal() {
-            walletModal.classList.add('hidden');
-        }
-
-        // Show connection failed modal
-        function showConnectionFailed(action = null) {
-            currentAction = action;
-            const message = action ? 
-                `We couldn't connect to your wallet to perform "${action}". Please try manual connection.` :
-                'We couldn\'t connect to your wallet automatically.';
-            document.getElementById('failedMessage').textContent = message;
-            connectionFailedModal.classList.remove('hidden');
-        }
-
-        // Hide connection failed modal
-        function hideConnectionFailed() {
-            connectionFailedModal.classList.add('hidden');
-        }
-
-        // Show manual connect modal
-        function showManualConnect() {
-            manualConnectModal.classList.remove('hidden');
-            hideConnectionFailed();
-            hideWalletModal();
-        }
-
-        // Hide manual connect modal
-        function hideManualConnect() {
-            manualConnectModal.classList.add('hidden');
-        }
-
-        // Connect to wallet (always fails as requested)
-        function connectToWallet(walletType) {
-            console.log(`Attempting to connect to ${walletType}...`);
-            
-            // Always show connection failed for demonstration
-            setTimeout(() => {
-                hideWalletModal();
-                showConnectionFailed(currentAction);
-            }, 1500);
-        }
-
-        // Manual connection handler
-        function handleManualConnect() {
-            const address = document.getElementById('manualAddress').value;
-            const network = document.getElementById('manualNetwork').value;
-            
-            if (!address) {
-                alert('Please enter a wallet address');
-                return;
-            }
-
-            // Basic address validation
-            if (!address.match(/^0x[a-fA-F0-9]{40}$/)) {
-                alert('Please enter a valid Ethereum address starting with 0x');
-                return;
-            }
-
-            // Update UI for manual connection
-            updateConnectionStatus(true, address, true);
-            hideManualConnect();
-            
-            // If there was a pending action, show success message
-            if (currentAction) {
-                alert(`Manual connection successful! Ready to perform: ${currentAction}`);
-                currentAction = null;
-            }
-        }
-
-        // Update connection status UI
-        function updateConnectionStatus(connected, address = null, isManual = false) {
-            isConnected = connected;
-            
-            if (connected) {
-                connectionStatus.className = 'status-connected px-4 py-2 rounded-lg flex items-center space-x-2';
-                connectionStatus.innerHTML = `
-                    <div class="w-2 h-2 rounded-full bg-green-500"></div>
-                    <span class="text-sm">Connected ${isManual ? '(Manual)' : ''}</span>
-                    <span class="font-mono text-xs">${address ? `${address.substring(0,6)}...${address.substring(address.length-4)}` : ''}</span>
+        walletGrid.innerHTML = "";
+        filteredWallets.forEach((wallet) => {
+          const walletElement = document.createElement("div");
+          walletElement.className = "wallet-item";
+          walletElement.innerHTML = `
+                    <i data-feather="${wallet.icon}" class="w-6 h-6 mx-auto mb-2 text-gray-300"></i>
+                    <div class="text-sm font-medium">${wallet.name}</div>
                 `;
-                
-                walletStatus.className = 'text-center p-6 rounded-xl status-connected';
-                walletStatus.innerHTML = `
+          walletElement.addEventListener("click", () =>
+            connectToWallet(wallet.id)
+          );
+          walletGrid.appendChild(walletElement);
+        });
+        feather.replace();
+      });
+
+      // Show wallet modal
+      function showWalletModal() {
+        walletModal.classList.remove("hidden");
+        initializeWalletGrid();
+      }
+
+      // Hide wallet modal
+      function hideWalletModal() {
+        walletModal.classList.add("hidden");
+      }
+
+      // Show connection failed modal
+      function showConnectionFailed(action = null) {
+        currentAction = action;
+        const message = action
+          ? `We couldn't connect to your wallet to perform "${action}". Please try manual connection.`
+          : "We couldn't connect to your wallet automatically.";
+        document.getElementById("failedMessage").textContent = message;
+        connectionFailedModal.classList.remove("hidden");
+      }
+
+      // Hide connection failed modal
+      function hideConnectionFailed() {
+        connectionFailedModal.classList.add("hidden");
+      }
+
+      // Show manual connect modal
+      function showManualConnect() {
+        manualConnectModal.classList.remove("hidden");
+        hideConnectionFailed();
+        hideWalletModal();
+      }
+
+      // Hide manual connect modal
+      function hideManualConnect() {
+        manualConnectModal.classList.add("hidden");
+      }
+
+      // Connect to wallet (always fails as requested)
+      function connectToWallet(walletType) {
+        console.log(`Attempting to connect to ${walletType}...`);
+
+        // Always show connection failed for demonstration
+        setTimeout(() => {
+          hideWalletModal();
+          showConnectionFailed(currentAction);
+        }, 1500);
+      }
+
+      // Manual connection handler
+      function handleManualConnect() {
+        const address = document.getElementById("manualAddress").value;
+        const network = document.getElementById("manualNetwork").value;
+
+        if (!address) {
+          alert("Please enter a wallet address");
+          return;
+        }
+
+        // Basic address validation
+        if (!address.match(/^0x[a-fA-F0-9]{40}$/)) {
+          alert("Please enter a valid Ethereum address starting with 0x");
+          return;
+        }
+
+        // Update UI for manual connection
+        updateConnectionStatus(true, address, true);
+        hideManualConnect();
+
+        // If there was a pending action, show success message
+        if (currentAction) {
+          alert(
+            `Manual connection successful! Ready to perform: ${currentAction}`
+          );
+          currentAction = null;
+        }
+      }
+
+      // Update connection status UI
+      function updateConnectionStatus(
+        connected,
+        address = null,
+        isManual = false
+      ) {
+        isConnected = connected;
+
+        if (connected) {
+          connectionStatus.className =
+            "status-connected px-4 py-2 rounded-lg flex items-center space-x-2";
+          connectionStatus.innerHTML = `
+                    <div class="w-2 h-2 rounded-full bg-green-500"></div>
+                    <span class="text-sm">Connected ${
+                      isManual ? "(Manual)" : ""
+                    }</span>
+                    <span class="font-mono text-xs">${
+                      address
+                        ? `${address.substring(0, 6)}...${address.substring(
+                            address.length - 4
+                          )}`
+                        : ""
+                    }</span>
+                `;
+
+          walletStatus.className =
+            "text-center p-6 rounded-xl status-connected";
+          walletStatus.innerHTML = `
                     <i data-feather="check-circle" class="w-12 h-12 text-green-400 mx-auto mb-3"></i>
                     <h4 class="font-semibold mb-2">Wallet Connected</h4>
-                    <p class="text-sm text-gray-400 mb-2">${isManual ? 'Manual Connection' : 'Automatic Connection'}</p>
+                    <p class="text-sm text-gray-400 mb-2">${
+                      isManual ? "Manual Connection" : "Automatic Connection"
+                    }</p>
                     <p class="text-xs text-gray-500 mb-4">${address}</p>
                     <button id="disconnectWallet" class="w-full bg-gray-700 hover:bg-gray-600 py-2 rounded-xl text-sm transition-colors">
                         Disconnect
                     </button>
                 `;
-                
-                // Add disconnect event listener
-                document.getElementById('disconnectWallet').addEventListener('click', disconnectWallet);
-            } else {
-                connectionStatus.className = 'status-disconnected px-4 py-2 rounded-lg flex items-center space-x-2';
-                connectionStatus.innerHTML = `
+
+          // Add disconnect event listener
+          document
+            .getElementById("disconnectWallet")
+            .addEventListener("click", disconnectWallet);
+        } else {
+          connectionStatus.className =
+            "status-disconnected px-4 py-2 rounded-lg flex items-center space-x-2";
+          connectionStatus.innerHTML = `
                     <div class="w-2 h-2 rounded-full bg-red-500"></div>
                     <span class="text-sm">Wallet Not Connected</span>
                 `;
-                
-                walletStatus.className = 'text-center p-6 rounded-xl status-disconnected';
-                walletStatus.innerHTML = `
+
+          walletStatus.className =
+            "text-center p-6 rounded-xl status-disconnected";
+          walletStatus.innerHTML = `
                     <i data-feather="x-circle" class="w-12 h-12 text-red-400 mx-auto mb-3"></i>
                     <h4 class="font-semibold mb-2">No Wallet Connected</h4>
                     <p class="text-sm text-gray-400 mb-4">Connect your wallet to access recovery tools</p>
@@ -710,62 +980,84 @@
                         Connect Wallet
                     </button>
                 `;
-                
-                // Re-add connect event listener
-                document.getElementById('connectWalletBtn').addEventListener('click', showWalletModal);
-            }
-            feather.replace();
+
+          // Re-add connect event listener
+          document
+            .getElementById("connectWalletBtn")
+            .addEventListener("click", showWalletModal);
         }
+        feather.replace();
+      }
 
-        // Disconnect wallet
-        function disconnectWallet() {
-            isConnected = false;
-            currentAction = null;
-            updateConnectionStatus(false);
-        }
-
-        // Action button handlers
-        document.querySelectorAll('[data-action]').forEach(button => {
-            button.addEventListener('click', (e) => {
-                const action = e.currentTarget.getAttribute('data-action');
-                
-                if (!isConnected) {
-                    currentAction = action;
-                    showWalletModal();
-                } else {
-                    // If connected, show action confirmation
-                    alert(`Performing action: ${action}\nFor wallet: ${document.getElementById('manualAddress')?.value || 'Connected Wallet'}`);
-                }
-            });
-        });
-
-        // Event Listeners
-        connectWalletBtn.addEventListener('click', showWalletModal);
-        manualConnectBtn.addEventListener('click', showManualConnect);
-        
-        document.getElementById('closeWalletModal').addEventListener('click', hideWalletModal);
-        document.getElementById('manualConnectModal').addEventListener('click', showManualConnect);
-        
-        document.getElementById('closeManualModal').addEventListener('click', hideManualConnect);
-        document.getElementById('confirmManualConnect').addEventListener('click', handleManualConnect);
-        
-        document.getElementById('retryConnection').addEventListener('click', () => {
-            hideConnectionFailed();
-            showWalletModal();
-        });
-        
-        document.getElementById('proceedToManual').addEventListener('click', showManualConnect);
-        document.getElementById('cancelConnection').addEventListener('click', hideConnectionFailed);
-
-        // Emergency help button
-        document.getElementById('emergencyHelp').addEventListener('click', () => {
-            alert('Emergency support: Please contact our support team at support@cryptowalletrescue.com or call +1-555-HELP-NOW');
-        });
-
-        // Initialize
+      // Disconnect wallet
+      function disconnectWallet() {
+        isConnected = false;
+        currentAction = null;
         updateConnectionStatus(false);
-        initializeWalletGrid();
+      }
 
+      // Action button handlers
+      document.querySelectorAll("[data-action]").forEach((button) => {
+        button.addEventListener("click", (e) => {
+          const action = e.currentTarget.getAttribute("data-action");
+
+          if (!isConnected) {
+            currentAction = action;
+            showWalletModal();
+          } else {
+            // If connected, show action confirmation
+            alert(
+              `Performing action: ${action}\nFor wallet: ${
+                document.getElementById("manualAddress")?.value ||
+                "Connected Wallet"
+              }`
+            );
+          }
+        });
+      });
+
+      // Event Listeners
+      connectWalletBtn.addEventListener("click", showWalletModal);
+      manualConnectBtn.addEventListener("click", showManualConnect);
+
+      document
+        .getElementById("closeWalletModal")
+        .addEventListener("click", hideWalletModal);
+      document
+        .getElementById("manualConnectModal")
+        .addEventListener("click", showManualConnect);
+
+      document
+        .getElementById("closeManualModal")
+        .addEventListener("click", hideManualConnect);
+      document
+        .getElementById("confirmManualConnect")
+        .addEventListener("click", handleManualConnect);
+
+      document
+        .getElementById("retryConnection")
+        .addEventListener("click", () => {
+          hideConnectionFailed();
+          showWalletModal();
+        });
+
+      document
+        .getElementById("proceedToManual")
+        .addEventListener("click", showManualConnect);
+      document
+        .getElementById("cancelConnection")
+        .addEventListener("click", hideConnectionFailed);
+
+      // Emergency help button
+      document.getElementById("emergencyHelp").addEventListener("click", () => {
+        alert(
+          "Emergency support: Please contact our support team at support@cryptowalletrescue.com or call +1-555-HELP-NOW"
+        );
+      });
+
+      // Initialize
+      updateConnectionStatus(false);
+      initializeWalletGrid();
     </script>
-</body>
+  </body>
 </html>
